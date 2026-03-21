@@ -6,7 +6,8 @@ let tempMarker = null;
 let formInfoWindow = null;
 let isCreatingPost = false;
 
-const savedPosts = [];
+let posts = [];
+let postMarkers = [];
 
 async function initMap() {
   const { Map, InfoWindow } = await google.maps.importLibrary("maps");
@@ -39,6 +40,10 @@ async function initMap() {
 
   setupSearch();
   setupMapClick();
+  renderPosts();
+
+  // Helpful for debugging in browser console
+  window.posts = posts;
 }
 
 function setupSearch() {
@@ -75,7 +80,7 @@ function setupSearch() {
 
       searchMarker = new google.maps.Marker({
         map,
-        position: location,
+        position: location
       });
     } catch (error) {
       console.error("Geocoding failed:", error);
@@ -98,21 +103,21 @@ function setupMapClick() {
       return;
     }
 
-    const lat = event.latLng.lat();
-    const lng = event.latLng.lng();
-
     tempMarker = new google.maps.Marker({
       map,
-      position: event.latLng,
+      position: event.latLng
     });
 
     isCreatingPost = true;
 
-    openPostForm(lat, lng, event.latLng);
+    openPostForm(event.latLng);
   });
 }
 
-function openPostForm(lat, lng, latLngObject) {
+function openPostForm(latLngObject) {
+  const lat = latLngObject.lat();
+  const lng = latLngObject.lng();
+
   const content = `
     <div style="min-width: 220px; padding: 4px 2px;">
       <div style="font-weight: 600; margin-bottom: 8px;">Create post</div>
@@ -168,7 +173,7 @@ function openPostForm(lat, lng, latLngObject) {
   formInfoWindow.setPosition(latLngObject);
   formInfoWindow.open({
     map,
-    anchor: tempMarker,
+    anchor: tempMarker
   });
 
   google.maps.event.addListenerOnce(formInfoWindow, "domready", () => {
@@ -181,14 +186,14 @@ function openPostForm(lat, lng, latLngObject) {
 
       titleInput.addEventListener("keydown", (event) => {
         if (event.key === "Enter") {
-          handleSavePost(lat, lng, latLngObject);
+          handleSavePost(latLngObject);
         }
       });
     }
 
     if (saveButton) {
       saveButton.addEventListener("click", () => {
-        handleSavePost(lat, lng, latLngObject);
+        handleSavePost(latLngObject);
       });
     }
 
@@ -204,61 +209,39 @@ function openPostForm(lat, lng, latLngObject) {
   });
 }
 
-function handleSavePost(lat, lng, latLngObject) {
+function buildPostData(latLngObject) {
   const titleInput = document.getElementById("post-title-input");
   const title = titleInput ? titleInput.value.trim() : "";
 
-  if (!title) {
+  return {
+    id: Date.now(),
+    title,
+    lat: latLngObject.lat(),
+    lng: latLngObject.lng()
+  };
+}
+
+function handleSavePost(latLngObject) {
+  const post = buildPostData(latLngObject);
+
+  if (!post.title) {
     alert("Please enter a title.");
     return;
   }
 
-  const post = {
-    id: Date.now(),
-    title,
-    lat,
-    lng,
-  };
+  posts.push(post);
 
-  savedPosts.push(post);
+  cleanupPostCreationUI();
+  renderPosts();
 
-  if (tempMarker) {
-    tempMarker.setMap(null);
-    tempMarker = null;
-  }
-
-  const permanentMarker = new google.maps.Marker({
-    map,
-    position: latLngObject,
-    title: title,
-  });
-
-  const postInfoWindow = new google.maps.InfoWindow({
-    content: `
-      <div style="min-width: 160px;">
-        <div style="font-weight: 600; margin-bottom: 4px;">${escapeHtml(title)}</div>
-        <div style="font-size: 12px; color: #555;">
-          Lat: ${lat.toFixed(6)}<br>
-          Lng: ${lng.toFixed(6)}
-        </div>
-      </div>
-    `
-  });
-
-  permanentMarker.addListener("click", () => {
-    postInfoWindow.open({
-      map,
-      anchor: permanentMarker,
-    });
-  });
-
-  formInfoWindow.close();
-  isCreatingPost = false;
-
-  console.log("Saved posts:", savedPosts);
+  console.log("Current posts:", posts);
 }
 
 function handleCancelPost() {
+  cleanupPostCreationUI();
+}
+
+function cleanupPostCreationUI() {
   if (tempMarker) {
     tempMarker.setMap(null);
     tempMarker = null;
@@ -266,6 +249,46 @@ function handleCancelPost() {
 
   formInfoWindow.close();
   isCreatingPost = false;
+}
+
+function renderPosts() {
+  clearPostMarkers();
+
+  posts.forEach((post) => {
+    const marker = new google.maps.Marker({
+      map,
+      position: { lat: post.lat, lng: post.lng },
+      title: post.title
+    });
+
+    const postInfoWindow = new google.maps.InfoWindow({
+      content: `
+        <div style="min-width: 160px;">
+          <div style="font-weight: 600; margin-bottom: 4px;">
+            ${escapeHtml(post.title)}
+          </div>
+          <div style="font-size: 12px; color: #555;">
+            Lat: ${post.lat.toFixed(6)}<br>
+            Lng: ${post.lng.toFixed(6)}
+          </div>
+        </div>
+      `
+    });
+
+    marker.addListener("click", () => {
+      postInfoWindow.open({
+        map,
+        anchor: marker
+      });
+    });
+
+    postMarkers.push(marker);
+  });
+}
+
+function clearPostMarkers() {
+  postMarkers.forEach((marker) => marker.setMap(null));
+  postMarkers = [];
 }
 
 function escapeHtml(str) {
