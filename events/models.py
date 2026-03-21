@@ -2,6 +2,7 @@
 Models for the events app.
 """
 from django.db import models
+from django.contrib.auth.models import User
 
 
 class Event(models.Model):
@@ -16,6 +17,7 @@ class Event(models.Model):
         blank=True,  # Optional field
         help_text="Event location address"
     )
+    creator = models.ForeignKey(User, on_delete=models.CASCADE, default=1)
 
     class Meta:
         ordering = ['time']

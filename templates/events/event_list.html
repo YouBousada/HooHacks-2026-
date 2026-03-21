@@ -70,8 +70,10 @@
                         {% endif %}
                         <div class="event-card-buttons">
                             <a href="{% url 'event_detail' event.pk %}" class="btn btn-small btn-view">View</a>
-                            <a href="{% url 'event_update' event.pk %}" class="btn btn-small btn-edit">Edit</a>
-                            <a href="{% url 'event_delete' event.pk %}" class="btn btn-small btn-delete">Delete</a>
+                            {% if user == event.creator %}
+                                <a href="{% url 'event_update' event.pk %}" class="btn btn-small btn-edit">Edit</a>
+                                <a href="{% url 'event_delete' event.pk %}" class="btn btn-small btn-delete">Delete</a>
+                            {% endif %}
                         </div>
                     </div>
                 {% endfor %}

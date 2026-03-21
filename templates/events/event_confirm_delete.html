@@ -50,6 +50,7 @@
             <div class="event-info">
                 <strong>{{ object.name }}</strong>
                 <span>📅 {{ object.time|date:"F d, Y g:i A" }}</span>
+                <span>👤 Created by {{ object.creator.username }}</span>
             </div>
 
             <p class="warning-text">⚠️ This action cannot be undone.</p>

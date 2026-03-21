@@ -69,12 +69,16 @@
 
             <div class="detail-section">
                 <h3>ℹ️ Created</h3>
-                <p class="label">{{ event.created_at|date:"F d, Y g:i A" }}</p>
+                <p class="label">{{ event.created_at|date:"F d, Y g:i A" }} by <strong>{{ event.creator.username }}</strong></p>
             </div>
 
             <div class="action-buttons">
-                <a href="{% url 'event_update' event.pk %}" class="btn btn-orange">✏️ Edit Event</a>
-                <a href="{% url 'event_delete' event.pk %}" class="btn btn-danger">🗑️ Delete Event</a>
+                {% if user == event.creator %}
+                    <a href="{% url 'event_update' event.pk %}" class="btn btn-orange">✏️ Edit Event</a>
+                    <a href="{% url 'event_delete' event.pk %}" class="btn btn-danger">🗑️ Delete Event</a>
+                {% else %}
+                    <p class="label"><em>You can view this event, but only its creator can edit or delete it.</em></p>
+                {% endif %}
             </div>
         </div>
     </div>
