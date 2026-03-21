@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ event.name }}{% endblock %}
+
+{% block content %}
+<div class="mb-3">
+    <a href="{% url 'event_list' %}" class="btn btn-secondary">← Back to Events</a>
+</div>
+
+<div class="card">
+    <div class="card-header bg-primary text-white">
+        <h2 class="mb-0">{{ event.name }}</h2>
+    </div>
+    <div class="card-body">
+        <div class="row mb-3">
+            <div class="col-md-4">
+                <h5>📅 Date & Time</h5>
+                <p>
+                    <strong>{{ event.time|date:"F d, Y" }}</strong> at 
+                    <strong>{{ event.time|time:"g:i A" }}</strong>
+                </p>
+            </div>
+            <div class="col-md-4">
+                <h5>📍 Address</h5>
+                {% if event.address %}
+                    <p><strong>{{ event.address }}</strong></p>
+                {% else %}
+                    <p class="text-muted"><em>No address provided.</em></p>
+                {% endif %}
+            </div>
+            <div class="col-md-4">
+                <h5>📝 Created</h5>
+                <p>{{ event.created_at|date:"F d, Y g:i A" }}</p>
+            </div>
+        </div>
+
+        <h5>Description</h5>
+        {% if event.description %}
+            <p>{{ event.description|linebreaks }}</p>
+        {% else %}
+            <p class="text-muted"><em>No description provided.</em></p>
+        {% endif %}
+
+        <hr>
+
+        <div class="btn-group" role="group">
+            <a href="{% url 'event_update' event.pk %}" class="btn btn-warning">✏️ Edit</a>
+            <a href="{% url 'event_delete' event.pk %}" class="btn btn-danger">🗑️ Delete</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

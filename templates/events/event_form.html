@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+
+{% block title %}{% if form.instance.pk %}Edit{% else %}Create{% endif %} Event{% endblock %}
+
+{% block content %}
+<div class="mb-3">
+    <a href="{% url 'event_list' %}" class="btn btn-secondary">← Back to Events</a>
+</div>
+
+<div class="card">
+    <div class="card-header bg-primary text-white">
+        <h2 class="mb-0">
+            {% if form.instance.pk %}
+                ✏️ Edit Event
+            {% else %}
+                ➕ Create New Event
+            {% endif %}
+        </h2>
+    </div>
+    <div class="card-body">
+        <form method="post" novalidate>
+            {% csrf_token %}
+            
+            {% for field in form %}
+                <div class="mb-3">
+                    <label for="{{ field.id_for_label }}" class="form-label">
+                        {{ field.label }}
+                    </label>
+                    {{ field }}
+                    {% if field.help_text %}
+                        <small class="form-text text-muted d-block">{{ field.help_text|safe }}</small>
+                    {% endif %}
+                    {% if field.errors %}
+                        <div class="invalid-feedback d-block">
+                            {{ field.errors }}
+                        </div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-success">
+                    {% if form.instance.pk %}Save Changes{% else %}Create Event{% endif %}
+                </button>
+                <a href="{% url 'event_list' %}" class="btn btn-outline-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
