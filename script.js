@@ -9,6 +9,26 @@ let isCreatingPost = false;
 let posts = [];
 let postMarkers = [];
 
+function lockMapInteraction() {
+  map.setOptions({
+    draggable: false,
+    scrollwheel: false,
+    disableDoubleClickZoom: true,
+    gestureHandling: "none",
+    keyboardShortcuts: false
+  });
+}
+
+function unlockMapInteraction() {
+  map.setOptions({
+    draggable: true,
+    scrollwheel: true,
+    disableDoubleClickZoom: false,
+    gestureHandling: "greedy",
+    keyboardShortcuts: false
+  });
+}
+
 async function initMap() {
   const { Map, InfoWindow } = await google.maps.importLibrary("maps");
 
@@ -103,14 +123,23 @@ function setupMapClick() {
       return;
     }
 
+    const clickedLatLng = event.latLng;
+
+    map.panTo(clickedLatLng);
+
+    if (map.getZoom() < 17) {
+      map.setZoom(17);
+    }
+
     tempMarker = new google.maps.Marker({
       map,
-      position: event.latLng
+      position: clickedLatLng
     });
 
     isCreatingPost = true;
+    lockMapInteraction();
 
-    openPostForm(event.latLng);
+    openPostForm(clickedLatLng);
   });
 }
 
@@ -249,6 +278,7 @@ function cleanupPostCreationUI() {
 
   formInfoWindow.close();
   isCreatingPost = false;
+  unlockMapInteraction();
 }
 
 function renderPosts() {
