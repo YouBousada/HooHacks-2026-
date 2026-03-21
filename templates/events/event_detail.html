@@ -1,52 +1,82 @@
-{% extends 'base.html' %}
-
-{% block title %}{{ event.name }}{% endblock %}
-
-{% block content %}
-<div class="mb-3">
-    <a href="{% url 'event_list' %}" class="btn btn-secondary">← Back to Events</a>
-</div>
-
-<div class="card">
-    <div class="card-header bg-primary text-white">
-        <h2 class="mb-0">{{ event.name }}</h2>
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ event.name }} | Cville Scout</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif; background: #f4f4f9; padding: 20px; }
+        .navbar { background: #232d4b; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+        .navbar a { color: white; text-decoration: none; font-weight: bold; font-size: 16px; }
+        .navbar div { display: flex; gap: 20px; align-items: center; }
+        .navbar a:hover { opacity: 0.8; }
+        .container { max-width: 800px; margin: 0 auto; }
+        .back-btn { display: inline-block; margin-bottom: 20px; padding: 10px 15px; background: #666; color: white; text-decoration: none; border-radius: 6px; }
+        .back-btn:hover { background: #555; }
+        .detail-card { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+        .detail-card h1 { color: #232d4b; margin-bottom: 20px; font-size: 28px; }
+        .detail-section { margin-bottom: 25px; }
+        .detail-section h3 { color: #232d4b; font-size: 16px; margin-bottom: 8px; }
+        .detail-section p { color: #333; font-size: 14px; line-height: 1.6; }
+        .detail-section .label { color: #666; font-size: 13px; }
+        .action-buttons { display: flex; gap: 10px; margin-top: 30px; }
+        .btn { padding: 10px 15px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; text-decoration: none; display: inline-block; }
+        .btn-orange { background: #e57200; color: white; }
+        .btn-orange:hover { background: #c46200; }
+        .btn-danger { background: #dc2626; color: white; }
+        .btn-danger:hover { background: #b91c1c; }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <a href="{% url 'event_list' %}">📅 Cville Scout</a>
+        <div>
+            <span style="color: white; font-size: 14px;">{{ user.username }}</span>
+            <a href="{% url 'logout' %}">Logout</a>
+        </div>
     </div>
-    <div class="card-body">
-        <div class="row mb-3">
-            <div class="col-md-4">
-                <h5>📅 Date & Time</h5>
-                <p>
-                    <strong>{{ event.time|date:"F d, Y" }}</strong> at 
-                    <strong>{{ event.time|time:"g:i A" }}</strong>
-                </p>
+
+    <div class="container">
+        <a href="{% url 'event_list' %}" class="back-btn">← Back to Events</a>
+
+        <div class="detail-card">
+            <h1>{{ event.name }}</h1>
+
+            <div class="detail-section">
+                <h3>📅 Date & Time</h3>
+                <p><strong>{{ event.time|date:"F d, Y" }}</strong> at <strong>{{ event.time|time:"g:i A" }}</strong></p>
             </div>
-            <div class="col-md-4">
-                <h5>📍 Address</h5>
+
+            <div class="detail-section">
+                <h3>📍 Location</h3>
                 {% if event.address %}
-                    <p><strong>{{ event.address }}</strong></p>
+                    <p>{{ event.address }}</p>
                 {% else %}
-                    <p class="text-muted"><em>No address provided.</em></p>
+                    <p class="label"><em>No address provided</em></p>
                 {% endif %}
             </div>
-            <div class="col-md-4">
-                <h5>📝 Created</h5>
-                <p>{{ event.created_at|date:"F d, Y g:i A" }}</p>
+
+            <div class="detail-section">
+                <h3>📝 Description</h3>
+                {% if event.description %}
+                    <p>{{ event.description|linebreaks }}</p>
+                {% else %}
+                    <p class="label"><em>No description provided</em></p>
+                {% endif %}
+            </div>
+
+            <div class="detail-section">
+                <h3>ℹ️ Created</h3>
+                <p class="label">{{ event.created_at|date:"F d, Y g:i A" }}</p>
+            </div>
+
+            <div class="action-buttons">
+                <a href="{% url 'event_update' event.pk %}" class="btn btn-orange">✏️ Edit Event</a>
+                <a href="{% url 'event_delete' event.pk %}" class="btn btn-danger">🗑️ Delete Event</a>
             </div>
         </div>
-
-        <h5>Description</h5>
-        {% if event.description %}
-            <p>{{ event.description|linebreaks }}</p>
-        {% else %}
-            <p class="text-muted"><em>No description provided.</em></p>
-        {% endif %}
-
-        <hr>
-
-        <div class="btn-group" role="group">
-            <a href="{% url 'event_update' event.pk %}" class="btn btn-warning">✏️ Edit</a>
-            <a href="{% url 'event_delete' event.pk %}" class="btn btn-danger">🗑️ Delete</a>
-        </div>
     </div>
-</div>
-{% endblock %}
+</body>
+</html>

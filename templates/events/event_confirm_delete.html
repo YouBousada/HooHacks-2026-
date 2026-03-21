@@ -1,31 +1,67 @@
-{% extends 'base.html' %}
-
-{% block title %}Delete Event{% endblock %}
-
-{% block content %}
-<div class="mb-3">
-    <a href="{% url 'event_list' %}" class="btn btn-secondary">← Back to Events</a>
-</div>
-
-<div class="card border-danger">
-    <div class="card-header bg-danger text-white">
-        <h2 class="mb-0">🗑️ Delete Event</h2>
-    </div>
-    <div class="card-body">
-        <p class="lead">Are you sure you want to delete this event?</p>
-        
-        <div class="alert alert-warning" role="alert">
-            <strong>{{ object.name }}</strong><br>
-            Scheduled for {{ object.time|date:"F d, Y g:i A" }}
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Delete Event | Cville Scout</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif; background: #f4f4f9; padding: 20px; }
+        .navbar { background: #232d4b; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+        .navbar a { color: white; text-decoration: none; font-weight: bold; font-size: 16px; }
+        .navbar div { display: flex; gap: 20px; align-items: center; }
+        .navbar a:hover { opacity: 0.8; }
+        .container { max-width: 600px; margin: 0 auto; }
+        .back-btn { display: inline-block; margin-bottom: 20px; padding: 10px 15px; background: #666; color: white; text-decoration: none; border-radius: 6px; }
+        .back-btn:hover { background: #555; }
+        .alert-card { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); border-left: 4px solid #dc2626; }
+        .alert-card h1 { color: #dc2626; margin-bottom: 20px; font-size: 24px; }
+        .alert-card p { color: #333; font-size: 14px; line-height: 1.6; margin-bottom: 15px; }
+        .event-info { background: #fef2f2; padding: 15px; border-radius: 6px; margin: 15px 0; border-left: 3px solid #dc2626; }
+        .event-info strong { color: #232d4b; display: block; margin-bottom: 5px; }
+        .event-info span { color: #666; font-size: 13px; }
+        .warning-text { color: #dc2626; font-weight: 500; margin: 20px 0; }
+        .action-buttons { display: flex; gap: 10px; margin-top: 30px; }
+        .btn { padding: 10px 15px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; text-decoration: none; display: inline-block; }
+        .btn-danger { background: #dc2626; color: white; }
+        .btn-danger:hover { background: #b91c1c; }
+        .btn-secondary { background: #666; color: white; }
+        .btn-secondary:hover { background: #555; }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <a href="{% url 'event_list' %}">📅 Cville Scout</a>
+        <div>
+            <span style="color: white; font-size: 14px;">{{ user.username }}</span>
+            <a href="{% url 'logout' %}">Logout</a>
         </div>
-
-        <p class="text-muted">This action cannot be undone.</p>
-
-        <form method="post" class="d-inline">
-            {% csrf_token %}
-            <button type="submit" class="btn btn-danger">Yes, Delete</button>
-            <a href="{% url 'event_detail' object.pk %}" class="btn btn-outline-secondary">Cancel</a>
-        </form>
     </div>
-</div>
-{% endblock %}
+
+    <div class="container">
+        <a href="{% url 'event_list' %}" class="back-btn">← Back to Events</a>
+
+        <div class="alert-card">
+            <h1>🗑️ Delete Event</h1>
+            
+            <p>Are you sure you want to delete this event?</p>
+
+            <div class="event-info">
+                <strong>{{ object.name }}</strong>
+                <span>📅 {{ object.time|date:"F d, Y g:i A" }}</span>
+            </div>
+
+            <p class="warning-text">⚠️ This action cannot be undone.</p>
+
+            <form method="post">
+                {% csrf_token %}
+                <div class="action-buttons">
+                    <button type="submit" class="btn btn-danger">Yes, Delete Event</button>
+                    <a href="{% url 'event_detail' object.pk %}" class="btn btn-secondary">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>
