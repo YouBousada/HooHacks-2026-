@@ -1,38 +1,21 @@
 {% extends 'layout.html' %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Join Cville Scout</title>
-    <link rel="stylesheet" href="../static/css/style.css">
-    <style>
-        .auth-wrapper { display: flex; justify-content: center; align-items: center; height: 100vh; background: #f4f4f9; }
-        .auth-card { background: white; padding: 40px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); width: 100%; max-width: 400px; text-align: center; }
-        .auth-input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
-        .auth-btn { background: #232d4b; color: white; padding: 12px; width: 100%; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; margin-top: 10px; }
-        .auth-btn:hover { background: #1a2238; }
-    </style>
-</head>
-<body>
-    <div class="auth-wrapper">
-        <div class="auth-card">
-            <h2 style="color: #232d4b;">Create Account</h2>
-            <p style="color: #666; margin-bottom: 20px;">Join the Charlottesville community.</p>
+
+{% block content %}
+<div class="auth-wrapper" style="display: flex; justify-content: center; align-items: center; height: 80vh;">
+    <div class="auth-card" style="background: white; padding: 40px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); width: 100%; max-width: 400px; text-align: center;">
+        <h2 style="color: #232d4b;">Create Account</h2>
+        <p style="color: #666; margin-bottom: 20px;">Join the Cville Scout community.</p>
+        
+        <form method="POST" action="{% url 'signup' %}">
+            {% csrf_token %}
+            <input type="text" name="first_name" class="auth-input" placeholder="First Name" required style="width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 6px;">
+            <input type="text" name="last_name" class="auth-input" placeholder="Last Name" required style="width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 6px;">
+            <input type="email" name="email" class="auth-input" placeholder="Email Address" required style="width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 6px;">
+            <input type="password" name="password" class="auth-input" placeholder="Create Password" required style="width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 6px;">
             
-            <form>
-                <input type="text" class="auth-input" placeholder="First Name" required>
-                <input type="text" class="auth-input" placeholder="Last Name" required>
-                <input type="email" class="auth-input" placeholder="Email Address" required>
-                <input type="password" class="auth-input" placeholder="Create Password" required>
-                
-                <button type="button" class="auth-btn" onclick="window.location.href='/login'">Sign Up</button>
-            </form>
-            
-            <p style="margin-top: 20px; font-size: 13px;">
-                Already have an account? <a href="/login" style="color: #e57200; font-weight: bold;">Login here</a>
-            </p>
-        </div>
+            <button type="submit" class="auth-btn" style="background: #232d4b; color: white; padding: 12px; width: 100%; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; margin-top: 10px;">Sign Up</button>
+        </form>
     </div>
-</body>
-</html>
+</div>
+{% endblock %}
