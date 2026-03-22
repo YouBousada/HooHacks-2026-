@@ -19,10 +19,8 @@ var CATEGORY_CONFIG = {
     trail:       { emoji: '🥾', color: '#43a047' },
     gym:         { emoji: '💪', color: '#fb8c00' },
     history:     { emoji: '📚', color: '#8e24aa' },
-    bar:         { emoji: '🍺', color: '#f4a800' },
     cafe:        { emoji: '☕', color: '#6d4c41' },
     park:        { emoji: '🌳', color: '#2e7d32' },
-    vineyard:    { emoji: '🍷', color: '#ad1457' },
     arts:        { emoji: '🎨', color: '#0288d1' },
     shopping:    { emoji: '🛍️', color: '#7b1fa2' },
     hidden_gem:  { emoji: '💎', color: '#00897b' },
@@ -64,14 +62,6 @@ var cvilleLocations = [
     { name: "Ash Lawn-Highland",       type: "history", coords: [37.9810, -78.4370], budget: 15, address: "1000 James Monroe Pkwy, Charlottesville, VA",   hours: "Daily 9am–6pm (Apr–Oct), 11am–5pm (Nov–Mar)", desc: "James Monroe's historic estate near Monticello." },
     { name: "Court Square",            type: "history", coords: [38.0313, -78.4793], budget: 0,  address: "Court Square, Charlottesville, VA",              hours: "Open daily, always accessible",        desc: "Historic downtown square with 19th-century architecture." },
     { name: "UVA Rotunda",             type: "history", coords: [38.0353, -78.5035], budget: 0,  address: "1826 University Ave, Charlottesville, VA",       hours: "Daily 11am–5pm",                       desc: "Jefferson's iconic centerpiece of the University of Virginia." },
-    // ── Bars ──
-    { name: "Champion Brewing Co.",    type: "bar", coords: [38.0295, -78.4798], budget: 20, address: "324 6th St SE, Charlottesville, VA",           hours: "Mon–Thu 3–11pm, Fri 2pm–12am, Sat 12pm–12am, Sun 12–9pm", desc: "Local craft brewery on the Downtown Mall." },
-    { name: "The Pavilion at Loren",   type: "bar", coords: [38.0301, -78.4770], budget: 30, address: "200 W Main St, Charlottesville, VA",            hours: "Wed–Sat 5pm–12am",                        desc: "Rooftop bar with 360 views and live music." },
-    { name: "Random Row Brewing",      type: "bar", coords: [38.0412, -78.4881], budget: 18, address: "931 Broadway St, Charlottesville, VA",          hours: "Mon–Thu 3–10pm, Fri 2–11pm, Sat 12–11pm, Sun 12–9pm", desc: "Neighborhood brewery with rotating craft taps." },
-    { name: "The Spot on the Corner",  type: "bar", coords: [38.0349, -78.5003], budget: 15, address: "1327 W Main St, Charlottesville, VA",           hours: "Daily 11am–2am",                          desc: "Lively bar on the Corner popular with UVA students." },
-    { name: "Blue Moon Diner",         type: "bar", coords: [38.0342, -78.4994], budget: 12, address: "512 W Main St, Charlottesville, VA",            hours: "Daily 7am–3am",                           desc: "Late-night diner and bar with a fun dive atmosphere." },
-    { name: "The Alley Light",         type: "bar", coords: [38.0297, -78.4783], budget: 25, address: "108 2nd St SW, Charlottesville, VA",            hours: "Tue–Sun 5pm–12am",                        desc: "Intimate wine and cocktail bar tucked in a Downtown alley." },
-    { name: "South Street Brewery",    type: "bar", coords: [38.0263, -78.4812], budget: 18, address: "106 W South St, Charlottesville, VA",           hours: "Mon–Thu 4–10pm, Fri 2–11pm, Sat 12–11pm", desc: "One of Cville's original craft breweries with a cozy taproom." },
     // ── Cafes ──
     { name: "Milli Coffee Roasters",   type: "cafe", coords: [38.0312, -78.4769], budget: 10, address: "709 W Main St, Charlottesville, VA",           hours: "Mon–Fri 7am–5pm, Sat–Sun 8am–5pm",        desc: "Specialty pour-over bar with single-origin beans." },
     { name: "Grit Coffee",             type: "cafe", coords: [38.0329, -78.4801], budget: 9,  address: "201 W Water St, Charlottesville, VA",          hours: "Mon–Fri 6:30am–6pm, Sat–Sun 7:30am–6pm",  desc: "Beloved local roaster with multiple Cville locations." },
@@ -86,12 +76,6 @@ var cvilleLocations = [
     { name: "Pen Park",                type: "park", coords: [38.0623, -78.4712], budget: 0, address: "1800 Pen Park Rd, Charlottesville, VA",        hours: "Open daily 6am–10pm",                     desc: "Spacious park with a golf course, trails, and sports fields." },
     { name: "Darden Towe Park",        type: "park", coords: [38.0401, -78.4431], budget: 0, address: "1335 Darden Towe Park Rd, Charlottesville, VA",hours: "Open daily 6am–9pm",                      desc: "Riverside park with baseball fields and walking paths." },
     { name: "Belmont Park",            type: "park", coords: [38.0214, -78.4758], budget: 0, address: "Belmont Ave, Charlottesville, VA",             hours: "Open daily, dawn to dusk",                desc: "Small neighborhood park in the vibrant Belmont district." },
-    // ── Vineyards ──
-    { name: "King Family Vineyards",   type: "vineyard", coords: [37.9543, -78.7543], budget: 20, address: "6550 Roseland Farm, Crozet, VA",          hours: "Mon–Fri 12–6pm, Sat–Sun 11am–6pm",        desc: "Stunning vineyard with polo on Sundays in summer." },
-    { name: "Pippin Hill Farm",        type: "vineyard", coords: [37.9089, -78.6234], budget: 30, address: "5022 Plank Rd, North Garden, VA",         hours: "Wed–Mon 11am–5pm",                        desc: "Award-winning winery with panoramic Blue Ridge views." },
-    { name: "Blenheim Vineyards",      type: "vineyard", coords: [37.9412, -78.5234], budget: 20, address: "31 Blenheim Farm, Charlottesville, VA",   hours: "Daily 11am–5:30pm",                       desc: "Dave Matthews' winery with beautiful rolling hill views." },
-    { name: "Trump Winery",            type: "vineyard", coords: [37.9876, -78.5643], budget: 25, address: "3550 Blenheim Rd, Charlottesville, VA",   hours: "Daily 10am–5pm",                          desc: "Large estate winery in a historic mansion near Monticello." },
-    { name: "Veritas Winery",          type: "vineyard", coords: [37.8923, -78.8123], budget: 22, address: "151 Veritas Ln, Afton, VA",               hours: "Mon–Fri 10am–5pm, Sat–Sun 10am–6pm",      desc: "Family-owned winery known for its Viognier and Cab Franc." },
     // ── Arts ──
     { name: "Virginia Discovery Museum", type: "arts", coords: [38.0293, -78.4800], budget: 10, address: "524 E Main St, Charlottesville, VA",        hours: "Tue–Sat 10am–5pm, Sun 1–5pm",             desc: "Hands-on children's museum near the Downtown Mall." },
     { name: "Second Street Gallery",   type: "arts", coords: [38.0299, -78.4782], budget: 0,  address: "115 2nd St NE, Charlottesville, VA",         hours: "Tue–Sat 11am–6pm, Sun 1–5pm",             desc: "Free contemporary art gallery in the arts district." },
