@@ -214,7 +214,7 @@ var pinIcon = L.divIcon({
 {% if post.lat %}
     pinMarker = L.marker([{{ post.lat }}, {{ post.lng }}], { icon: pinIcon }).addTo(hostMap);
     hostMap.setView([{{ post.lat }}, {{ post.lng }}], 15);
-    document.getElementById('pinBanner').textContent = '✅ Pin set — tap to move it';
+    document.getElementById('pinBanner').textContent = '📍 Pin set — tap to move it';
     document.getElementById('pinBanner').classList.add('pinned');
     document.getElementById('pinStatus').classList.add('visible');
 {% endif %}
@@ -234,7 +234,7 @@ hostMap.on('click', function(e) {
 
     // Update banner
     var banner = document.getElementById('pinBanner');
-    banner.textContent = '✅ Pin set — tap to move it';
+    banner.textContent = '📍 Pin set — tap to move it';
     banner.classList.add('pinned');
 
     // Show pin status in form
