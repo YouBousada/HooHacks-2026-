@@ -13,28 +13,6 @@ A basic Django web application for managing events with name, time, and descript
 
 ## Project Structure
 
-```
-HooHacks-2026-/
-├── manage.py                 # Django management script
-├── requirements.txt          # Python dependencies
-├── event_site/              # Main project configuration
-│   ├── settings.py          # Django settings
-│   ├── urls.py              # Main URL routing
-│   └── wsgi.py              # WSGI application
-├── events/                  # Events app
-│   ├── models.py            # Event model definition
-│   ├── views.py             # View logic
-│   ├── forms.py             # Event form
-│   ├── urls.py              # Events URL routing
-│   └── admin.py             # Admin interface
-└── templates/               # HTML templates
-    ├── base.html            # Base template
-    └── events/              # Event templates
-        ├── event_list.html
-        ├── event_detail.html
-        ├── event_form.html
-        └── event_confirm_delete.html
-```
 
 ## Quickstart
 
