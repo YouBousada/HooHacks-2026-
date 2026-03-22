@@ -1,0 +1,307 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HooThere | Login</title>
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Nunito:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            min-height: 100vh;
+            font-family: 'Nunito', sans-serif;
+            background: linear-gradient(145deg, #e57200 0%, #ff9a3c 40%, #ffb347 70%, #e57200 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Floating background blobs */
+        body::before {
+            content: '';
+            position: absolute;
+            width: 500px; height: 500px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.07);
+            top: -150px; left: -150px;
+            pointer-events: none;
+        }
+        body::after {
+            content: '';
+            position: absolute;
+            width: 350px; height: 350px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.06);
+            bottom: -100px; right: -80px;
+            pointer-events: none;
+        }
+
+        /* Card */
+        .card {
+            background: white;
+            border-radius: 28px;
+            padding: 44px 40px 36px;
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+            box-shadow: 0 24px 60px rgba(180, 80, 0, 0.25), 0 4px 16px rgba(0,0,0,0.08);
+            position: relative;
+            z-index: 1;
+            animation: slideUp 0.5s ease;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(24px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Owl logo */
+        .owl-wrap {
+            margin-bottom: 6px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .owl-svg {
+            width: 80px;
+            height: 80px;
+            filter: drop-shadow(0 4px 10px rgba(229,114,0,0.3));
+        }
+
+        /* Brand name */
+        .brand-name {
+            font-family: 'Sora', sans-serif;
+            font-size: 32px;
+            font-weight: 800;
+            color: #e57200;
+            letter-spacing: -1px;
+            margin-bottom: 4px;
+        }
+
+        .brand-sub {
+            font-size: 13px;
+            color: #aaa;
+            font-weight: 500;
+            margin-bottom: 28px;
+            letter-spacing: 0.3px;
+        }
+
+        /* Divider */
+        .divider {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 22px;
+        }
+        .divider-line { flex: 1; height: 1px; background: #f0e6da; }
+        .divider-text { font-size: 11px; color: #ccc; font-weight: 600; letter-spacing: 1px; }
+
+        /* Inputs */
+        .input-group {
+            position: relative;
+            margin-bottom: 14px;
+            text-align: left;
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 16px;
+            pointer-events: none;
+        }
+
+        .auth-input {
+            width: 100%;
+            padding: 13px 14px 13px 42px;
+            border: 1.5px solid #eedfd0;
+            border-radius: 12px;
+            font-size: 14px;
+            font-family: 'Nunito', sans-serif;
+            color: #333;
+            background: #fffaf5;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .auth-input:focus {
+            border-color: #e57200;
+            box-shadow: 0 0 0 3px rgba(229,114,0,0.12);
+            background: white;
+        }
+
+        .auth-input::placeholder { color: #ccc; }
+
+        /* Login button */
+        .login-btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #e57200 0%, #ff9a3c 100%);
+            color: white;
+            border: none;
+            border-radius: 14px;
+            font-size: 15px;
+            font-weight: 700;
+            font-family: 'Sora', sans-serif;
+            cursor: pointer;
+            margin-top: 6px;
+            letter-spacing: 0.3px;
+            box-shadow: 0 6px 20px rgba(229,114,0,0.35);
+            transition: all 0.2s;
+        }
+
+        .login-btn:hover {
+            background: linear-gradient(135deg, #bf5e00 0%, #e57200 100%);
+            box-shadow: 0 8px 24px rgba(229,114,0,0.45);
+            transform: translateY(-1px);
+        }
+
+        .login-btn:active { transform: translateY(0); }
+
+        /* Error messages */
+        .error-box {
+            background: #fff0f0;
+            color: #c0392b;
+            border: 1px solid #fcc;
+            border-radius: 10px;
+            padding: 10px 14px;
+            font-size: 12px;
+            margin-bottom: 14px;
+            text-align: left;
+        }
+
+        /* Signup link */
+        .signup-row {
+            margin-top: 22px;
+            font-size: 13px;
+            color: #aaa;
+        }
+
+        .signup-row a {
+            color: #e57200;
+            font-weight: 700;
+            text-decoration: none;
+        }
+
+        .signup-row a:hover { text-decoration: underline; }
+
+        /* Small Cville tag */
+        .cville-tag {
+            display: inline-block;
+            margin-top: 18px;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: #e0c8b0;
+        }
+    </style>
+</head>
+<body>
+
+<div class="card">
+
+    <!-- OWL LOGO -->
+    <div class="owl-wrap">
+        <svg class="owl-svg" viewBox="0 0 110 110" xmlns="http://www.w3.org/2000/svg">
+            <!-- Ear tufts -->
+            <polygon points="36,26 30,8 44,22" fill="white"/>
+            <polygon points="74,26 80,8 66,22" fill="white"/>
+            <!-- Head -->
+            <ellipse cx="55" cy="38" rx="24" ry="22" fill="white"/>
+            <!-- Body -->
+            <ellipse cx="55" cy="75" rx="28" ry="28" fill="white"/>
+            <!-- Wing left -->
+            <ellipse cx="28" cy="72" rx="12" ry="22" fill="white" stroke="rgba(0,0,0,0.15)" stroke-width="1" transform="rotate(-10 28 72)"/>
+            <!-- Wing right -->
+            <ellipse cx="82" cy="72" rx="12" ry="22" fill="white" stroke="rgba(0,0,0,0.15)" stroke-width="1" transform="rotate(10 82 72)"/>
+            <!-- Wing feather lines left -->
+            <line x1="22" y1="62" x2="30" y2="88" stroke="rgba(255,255,255,0.5)" stroke-width="1.5" stroke-linecap="round"/>
+            <line x1="27" y1="59" x2="33" y2="88" stroke="rgba(255,255,255,0.5)" stroke-width="1.5" stroke-linecap="round"/>
+            <!-- Wing feather lines right -->
+            <line x1="88" y1="62" x2="80" y2="88" stroke="rgba(255,255,255,0.5)" stroke-width="1.5" stroke-linecap="round"/>
+            <line x1="83" y1="59" x2="77" y2="88" stroke="rgba(255,255,255,0.5)" stroke-width="1.5" stroke-linecap="round"/>
+            <!-- Chest belly -->
+            <ellipse cx="55" cy="76" rx="16" ry="20" fill="white" stroke="rgba(0,0,0,0.08)" stroke-width="1"/>
+            <!-- Chest feather curves -->
+            <path d="M 46 64 Q 55 60 64 64" fill="none" stroke="rgba(0,0,0,0.1)" stroke-width="1"/>
+            <path d="M 44 70 Q 55 66 66 70" fill="none" stroke="rgba(0,0,0,0.1)" stroke-width="1"/>
+            <path d="M 44 76 Q 55 72 66 76" fill="none" stroke="rgba(0,0,0,0.1)" stroke-width="1"/>
+            <!-- Facial disc -->
+            <ellipse cx="55" cy="40" rx="20" ry="18" fill="white" stroke="rgba(0,0,0,0.06)" stroke-width="1"/>
+            <!-- Left eye ring -->
+            <circle cx="44" cy="38" r="10" fill="white" stroke="black" stroke-width="2"/>
+            <!-- Right eye ring -->
+            <circle cx="66" cy="38" r="10" fill="white" stroke="black" stroke-width="2"/>
+            <!-- Left iris -->
+            <circle cx="44" cy="38" r="6.5" fill="black"/>
+            <!-- Right iris -->
+            <circle cx="66" cy="38" r="6.5" fill="black"/>
+            <!-- Eye shines -->
+            <circle cx="46" cy="36" r="2" fill="white"/>
+            <circle cx="68" cy="36" r="2" fill="white"/>
+            <!-- Beak -->
+            <polygon points="55,46 49,54 61,54" fill="white" stroke="black" stroke-width="1.5" stroke-linejoin="round"/>
+            <!-- Feet -->
+            <line x1="45" y1="100" x2="38" y2="108" stroke="white" stroke-width="3" stroke-linecap="round"/>
+            <line x1="45" y1="100" x2="45" y2="109" stroke="white" stroke-width="3" stroke-linecap="round"/>
+            <line x1="45" y1="100" x2="52" y2="108" stroke="white" stroke-width="3" stroke-linecap="round"/>
+            <line x1="65" y1="100" x2="58" y2="108" stroke="white" stroke-width="3" stroke-linecap="round"/>
+            <line x1="65" y1="100" x2="65" y2="109" stroke="white" stroke-width="3" stroke-linecap="round"/>
+            <line x1="65" y1="100" x2="72" y2="108" stroke="white" stroke-width="3" stroke-linecap="round"/>
+        </svg>
+    </div>
+
+    <div class="brand-name">HooThere</div>
+    <div class="brand-sub">Your Charlottesville hangout guide 🧡</div>
+
+    <div class="divider">
+        <div class="divider-line"></div>
+        <div class="divider-text">SIGN IN</div>
+        <div class="divider-line"></div>
+    </div>
+
+    {% if form.non_field_errors %}
+        <div class="error-box">
+            {% for error in form.non_field_errors %}{{ error }}<br>{% endfor %}
+        </div>
+    {% endif %}
+
+    <form method="post">
+        {% csrf_token %}
+
+        {% if form.username.errors %}
+            <div class="error-box">{% for e in form.username.errors %}{{ e }}<br>{% endfor %}</div>
+        {% endif %}
+        <div class="input-group">
+            <span class="input-icon">👤</span>
+            <input type="text" name="username" class="auth-input" placeholder="Username" required value="{{ form.username.value|default:'' }}">
+        </div>
+
+        {% if form.password.errors %}
+            <div class="error-box">{% for e in form.password.errors %}{{ e }}<br>{% endfor %}</div>
+        {% endif %}
+        <div class="input-group">
+            <span class="input-icon">🔒</span>
+            <input type="password" name="password" class="auth-input" placeholder="Password" required>
+        </div>
+
+        <button type="submit" class="login-btn">Let's Go 🦉</button>
+    </form>
+
+    <div class="signup-row">
+        New here? <a href="{% url 'signup' %}">Create an account</a>
+    </div>
+
+    <div class="cville-tag">📍 Charlottesville, VA</div>
+
+</div>
+
+</body>
+</html>

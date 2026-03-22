@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Cville Scout</title>
+    <link rel="stylesheet" href="../static/css/style.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <nav style="background: #1a2238; padding: 15px 25px; display: flex; justify-content: space-between; align-items: center; color: white;">
+        <div style="font-weight: bold; color: #e57200; letter-spacing: 1px;">CVILLE SCOUT</div>
+        <div>
+            <a href="login.html" style="color: white; text-decoration: none; margin-right: 20px;">Login</a>
+            <a href="signup.html" style="color: #e57200; text-decoration: none; font-weight: bold;">Sign Up</a>
+        </div>
+    </nav>
+
+    {% block content %}{% endblock %}
+
+    <script src="../static/js/script.js"></script>
+    <script async src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCR3b2rYrel9U36AHQMHjDckhN5xOkJFJ8&callback=initMap"></script>
+</body>
+</html>
