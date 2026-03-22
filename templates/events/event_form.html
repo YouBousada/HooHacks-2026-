@@ -1,0 +1,84 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% if form.instance.pk %}Edit{% else %}Create{% endif %} Event | Cville Scout</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif; background: #f4f4f9; padding: 20px; }
+        .navbar { background: #232d4b; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+        .navbar a { color: white; text-decoration: none; font-weight: bold; font-size: 16px; }
+        .navbar div { display: flex; gap: 20px; align-items: center; }
+        .navbar a:hover { opacity: 0.8; }
+        .container { max-width: 600px; margin: 0 auto; }
+        .back-btn { display: inline-block; margin-bottom: 20px; padding: 10px 15px; background: #666; color: white; text-decoration: none; border-radius: 6px; }
+        .back-btn:hover { background: #555; }
+        .form-card { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+        .form-card h1 { color: #232d4b; margin-bottom: 25px; font-size: 24px; }
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; margin-bottom: 8px; color: #232d4b; font-weight: 500; font-size: 14px; }
+        .form-group input, .form-group textarea { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; font-family: inherit; }
+        .form-group input:focus, .form-group textarea:focus { outline: none; border-color: #e57200; box-shadow: 0 0 5px rgba(229, 114, 0, 0.2); }
+        .form-group textarea { resize: vertical; min-height: 120px; }
+        .help-text { font-size: 12px; color: #666; margin-top: 5px; }
+        .error-messages { background: #fee; color: #c33; padding: 10px; border-radius: 6px; margin-bottom: 10px; font-size: 13px; }
+        .action-buttons { display: flex; gap: 10px; margin-top: 30px; }
+        .btn { padding: 12px 20px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; text-decoration: none; display: inline-block; }
+        .btn-orange { background: #e57200; color: white; }
+        .btn-orange:hover { background: #c46200; }
+        .btn-secondary { background: #666; color: white; }
+        .btn-secondary:hover { background: #555; }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <a href="{% url 'event_list' %}">📅 Cville Scout</a>
+        <div>
+            <span style="color: white; font-size: 14px;">{{ user.username }}</span>
+            <a href="{% url 'logout' %}">Logout</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <a href="{% url 'event_list' %}" class="back-btn">← Back to Events</a>
+
+        <div class="form-card">
+            <h1>
+                {% if form.instance.pk %}
+                    ✏️ Edit Event
+                {% else %}
+                    ➕ Create New Event
+                {% endif %}
+            </h1>
+
+            <form method="post" novalidate>
+                {% csrf_token %}
+                
+                {% for field in form %}
+                    <div class="form-group">
+                        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                        {% if field.errors %}
+                            <div class="error-messages">
+                                {% for error in field.errors %}{{ error }}<br>{% endfor %}
+                            </div>
+                        {% endif %}
+                        {{ field }}
+                        {% if field.help_text %}
+                            <div class="help-text">{{ field.help_text|safe }}</div>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+
+                <div class="action-buttons">
+                    <button type="submit" class="btn btn-orange">
+                        {% if form.instance.pk %}💾 Save Changes{% else %}Create Event{% endif %}
+                    </button>
+                    <a href="{% url 'event_list' %}" class="btn btn-secondary">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

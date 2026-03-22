@@ -1,0 +1,89 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Events | Cville Scout</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif; background: #f4f4f9; padding: 20px; }
+        .navbar { background: #232d4b; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+        .navbar a { color: white; text-decoration: none; font-weight: bold; font-size: 16px; }
+        .navbar div { display: flex; gap: 20px; align-items: center; }
+        .navbar a:hover { opacity: 0.8; }
+        .container { max-width: 1000px; margin: 0 auto; }
+        .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+        .page-header h1 { color: #232d4b; font-size: 28px; }
+        .btn { padding: 10px 15px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; text-decoration: none; display: inline-block; }
+        .btn-orange { background: #e57200; color: white; }
+        .btn-orange:hover { background: #c46200; }
+        .btn-secondary { background: #666; color: white; }
+        .btn-secondary:hover { background: #555; }
+        .events-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
+        .event-card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+        .event-card h3 { color: #232d4b; margin-bottom: 10px; }
+        .event-card .event-meta { font-size: 13px; color: #666; margin-bottom: 10px; }
+        .event-card p { color: #333; margin-bottom: 15px; font-size: 14px; }
+        .event-card-buttons { display: flex; gap: 10px; }
+        .btn-small { padding: 8px 12px; font-size: 12px; }
+        .btn-view { background: #232d4b; color: white; }
+        .btn-view:hover { background: #1a1f35; }
+        .btn-edit { background: #f59e0b; color: white; }
+        .btn-edit:hover { background: #d97706; }
+        .btn-delete { background: #dc2626; color: white; }
+        .btn-delete:hover { background: #b91c1c; }
+        .no-events { background: white; padding: 40px; border-radius: 12px; text-align: center; color: #666; }
+        .no-events h3 { color: #232d4b; margin-bottom: 15px; }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <a href="{% url 'event_list' %}">📅 Cville Scout</a>
+        <div>
+            <span style="color: white; font-size: 14px;">{{ user.username }}</span>
+            <a href="{% url 'logout' %}">Logout</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="page-header">
+            <h1>📅 All Events</h1>
+            <a href="{% url 'event_create' %}" class="btn btn-orange">+ New Event</a>
+        </div>
+
+        {% if events %}
+            <div class="events-grid">
+                {% for event in events %}
+                    <div class="event-card">
+                        <h3>{{ event.name }}</h3>
+                        <div class="event-meta">
+                            📆 {{ event.time|date:"F d, Y" }} at {{ event.time|time:"g:i A" }}
+                        </div>
+                        {% if event.address %}
+                            <div class="event-meta">
+                                📍 {{ event.address }}
+                            </div>
+                        {% endif %}
+                        {% if event.description %}
+                            <p>{{ event.description|truncatewords:15 }}</p>
+                        {% endif %}
+                        <div class="event-card-buttons">
+                            <a href="{% url 'event_detail' event.pk %}" class="btn btn-small btn-view">View</a>
+                            {% if user == event.creator %}
+                                <a href="{% url 'event_update' event.pk %}" class="btn btn-small btn-edit">Edit</a>
+                                <a href="{% url 'event_delete' event.pk %}" class="btn btn-small btn-delete">Delete</a>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="no-events">
+                <h3>No events yet!</h3>
+                <p>Get started by <a href="{% url 'event_create' %}" style="color: #e57200; font-weight: bold;">creating your first event</a>.</p>
+            </div>
+        {% endif %}
+    </div>
+</body>
+</html>

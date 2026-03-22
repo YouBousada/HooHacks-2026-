@@ -1,64 +1,633 @@
-{% extends 'layout.html' %}
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cville Scout | Interactive Map</title>
-    
+    <title>HooThere | Discover Charlottesville</title>
+
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    
-    <link rel="stylesheet" href="../static/css/style.css">
-    
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&family=Nunito:wght@400;500;600&display=swap" rel="stylesheet">
+
     <style>
-        .user-panel { padding: 15px 25px; border-bottom: 1px solid #eee; background: #fafafa; }
-        .discovery-tool { padding: 20px 25px; }
-        .chip-container { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
-        .chip { padding: 6px 14px; border: 1.5px solid #232d4b; border-radius: 20px; font-size: 12px; cursor: pointer; transition: 0.2s; }
-        .chip.active { background: #232d4b; color: white; }
-        #map { flex-grow: 1; height: 100vh; }
+        :root {
+            --orange:      #e57200;
+            --orange-dark: #bf5e00;
+            --orange-light:#fff3e0;
+            --orange-mid:  #ff9a3c;
+            --cream:       #fffaf5;
+            --navy:        #1a1f2e;
+            --text:        #2d2d2d;
+            --muted:       #8a8a8a;
+            --border:      #eedfd0;
+            --white:       #ffffff;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body, html {
+            height: 100%;
+            font-family: 'Nunito', sans-serif;
+            background: var(--cream);
+            color: var(--text);
+        }
+
+        .app-container { display: flex; height: 100vh; width: 100vw; overflow: hidden; }
+
+        /* ── SIDEBAR ── */
+        .sidebar {
+            width: 360px;
+            background: var(--white);
+            display: flex;
+            flex-direction: column;
+            z-index: 1000;
+            overflow: hidden;
+            border-right: 1px solid var(--border);
+            box-shadow: 4px 0 20px rgba(229,114,0,0.08);
+            flex-shrink: 0;
+        }
+
+        /* ── HEADER ── */
+        .sidebar-header {
+            background: linear-gradient(135deg, var(--orange) 0%, var(--orange-mid) 100%);
+            padding: 20px 22px 18px;
+            flex-shrink: 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .sidebar-header::before {
+            content: '';
+            position: absolute;
+            top: -30px; right: -30px;
+            width: 120px; height: 120px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.08);
+        }
+
+        .sidebar-header::after {
+            content: '';
+            position: absolute;
+            bottom: -20px; left: 20px;
+            width: 80px; height: 80px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.05);
+        }
+
+        .brand-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* ── OWL SVG LOGO ── */
+        .owl-logo {
+            width: 48px;
+            height: 48px;
+            flex-shrink: 0;
+            filter: drop-shadow(0 2px 6px rgba(0,0,0,0.2));
+        }
+
+        .brand-text { line-height: 1; }
+
+        .brand-name {
+            font-family: 'Sora', sans-serif;
+            font-size: 26px;
+            font-weight: 700;
+            color: white;
+            letter-spacing: -0.5px;
+        }
+
+        .brand-tagline {
+            font-size: 12px;
+            color: rgba(255,255,255,0.85);
+            font-weight: 500;
+            margin-top: 2px;
+        }
+
+        /* ── USER PANEL ── */
+        .user-panel {
+            padding: 10px 22px;
+            border-bottom: 1px solid var(--border);
+            background: var(--orange-light);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-shrink: 0;
+        }
+
+        .user-info { font-size: 12px; }
+        .user-info small { color: var(--muted); }
+        .user-info strong { display: block; color: var(--orange-dark); font-size: 13px; font-weight: 700; }
+        .signout-link { font-size: 11px; color: var(--orange); text-decoration: none; font-weight: 600; }
+        .signout-link:hover { color: var(--orange-dark); }
+
+        /* ── FILTERS ── */
+        .discovery-tool {
+            padding: 16px 22px;
+            border-bottom: 1px solid var(--border);
+            flex-shrink: 0;
+        }
+
+        .section-label {
+            font-family: 'Sora', sans-serif;
+            font-weight: 700;
+            font-size: 11px;
+            letter-spacing: 1.2px;
+            text-transform: uppercase;
+            color: var(--orange-dark);
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        /* Budget inputs */
+        .budget-row { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+        .budget-input {
+            width: 80px; padding: 9px 12px;
+            border: 1.5px solid var(--border);
+            border-radius: 8px; font-size: 13px;
+            font-family: 'Nunito', sans-serif;
+            color: var(--text);
+            background: var(--cream);
+            transition: border-color 0.2s;
+            outline: none;
+        }
+        .budget-input:focus { border-color: var(--orange); }
+        .budget-sep { color: var(--muted); font-size: 13px; }
+
+        /* Category chips */
+        .chip-container { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+        .chip {
+            display: inline-block;
+            padding: 5px 11px;
+            border: 1.5px solid var(--border);
+            border-radius: 20px;
+            font-size: 11.5px;
+            font-weight: 600;
+            font-family: 'Nunito', sans-serif;
+            color: var(--muted);
+            background: var(--cream);
+            transition: all 0.18s;
+            user-select: none;
+            cursor: pointer;
+        }
+        .chip.active {
+            background: var(--orange);
+            border-color: var(--orange);
+            color: white;
+        }
+        .chip:hover { border-color: var(--orange); color: var(--orange); }
+        .chip.active:hover { background: var(--orange-dark); border-color: var(--orange-dark); color: white; }
+
+        /* Apply button */
+        .apply-btn {
+            width: 100%;
+            background: linear-gradient(135deg, var(--orange) 0%, var(--orange-mid) 100%);
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 10px;
+            margin-top: 14px;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 14px;
+            font-family: 'Sora', sans-serif;
+            letter-spacing: 0.3px;
+            transition: all 0.2s;
+            box-shadow: 0 4px 12px rgba(229,114,0,0.3);
+        }
+        .apply-btn:hover {
+            background: linear-gradient(135deg, var(--orange-dark) 0%, var(--orange) 100%);
+            box-shadow: 0 6px 16px rgba(229,114,0,0.4);
+            transform: translateY(-1px);
+        }
+        .apply-btn:active { transform: translateY(0); }
+
+        /* Result count */
+        .result-count {
+            padding: 8px 22px;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--orange-dark);
+            background: var(--orange-light);
+            border-bottom: 1px solid var(--border);
+            letter-spacing: 0.3px;
+        }
+
+        /* ── RESULTS LIST ── */
+        #location-list { overflow-y: auto; flex-grow: 1; padding: 8px 10px; }
+        #location-list::-webkit-scrollbar { width: 4px; }
+        #location-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+        .location-card {
+            padding: 12px 14px;
+            border-radius: 10px;
+            margin-bottom: 6px;
+            cursor: pointer;
+            transition: all 0.18s;
+            border: 1.5px solid transparent;
+            background: var(--cream);
+        }
+        .location-card:hover {
+            border-color: var(--orange);
+            background: var(--orange-light);
+            transform: translateX(2px);
+        }
+        .location-card strong {
+            font-family: 'Sora', sans-serif;
+            color: var(--navy);
+            font-size: 13px;
+            font-weight: 600;
+            display: block;
+        }
+        .location-card .meta { color: var(--muted); font-size: 11px; margin-top: 2px; }
+        .budget-tag {
+            display: inline-block; margin-top: 6px;
+            background: #e8f5e9; color: #2e7d32;
+            font-size: 10.5px; font-weight: 700;
+            padding: 2px 8px; border-radius: 8px;
+        }
+        .free-tag { background: #e3f2fd; color: #1565c0; }
+        .gem-tag { background: #e0f2f1; color: #00695c; }
+
+        .empty-state {
+            text-align: center; padding: 40px 20px;
+            color: var(--muted); font-size: 13px; line-height: 1.7;
+        }
+        .empty-state .owl-empty { font-size: 40px; display: block; margin-bottom: 10px; }
+
+        /* ── MAP ── */
+        #map { flex-grow: 1; height: 100%; }
+
+        /* ── BOTTOM NAV ── */
+        .bottom-nav {
+            position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+            display: flex; gap: 12px; padding: 12px 20px 16px;
+            background: white; border-radius: 24px 24px 0 0;
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.1);
+            z-index: 2000;
+        }
+        .nav-tab {
+            padding: 10px 28px; border-radius: 20px;
+            font-family: 'Sora', sans-serif; font-size: 14px; font-weight: 700;
+            cursor: pointer; border: 2px solid var(--orange);
+            transition: all 0.2s; text-decoration: none;
+        }
+        .nav-tab.hoo { background: white; color: var(--orange); }
+        .nav-tab.hoo:hover { background: var(--orange-light); }
+        .nav-tab.what { background: var(--orange); color: white; box-shadow: 0 4px 12px rgba(229,114,0,0.35); }
+
+        /* ── LEAFLET POPUP OVERRIDES ── */
+        .leaflet-popup-content-wrapper {
+            border-radius: 12px !important;
+            box-shadow: 0 8px 30px rgba(229,114,0,0.15) !important;
+            border: 1.5px solid var(--border) !important;
+        }
+        .leaflet-popup-tip-container { display: none; }
+
+        /* ── SPLASH OVERLAY ── */
+        .splash-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.55);
+            backdrop-filter: blur(4px);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: fadeInOverlay 0.4s ease;
+        }
+
+        @keyframes fadeInOverlay {
+            from { opacity: 0; }
+            to   { opacity: 1; }
+        }
+
+        .splash-overlay.hiding {
+            animation: fadeOutOverlay 0.4s ease forwards;
+        }
+
+        @keyframes fadeOutOverlay {
+            from { opacity: 1; }
+            to   { opacity: 0; }
+        }
+
+        .splash-card {
+            background: white;
+            border-radius: 28px;
+            padding: 48px 44px 40px;
+            max-width: 420px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 32px 80px rgba(0,0,0,0.3);
+            animation: slideUpCard 0.45s cubic-bezier(0.34,1.56,0.64,1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .splash-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 5px;
+            background: linear-gradient(90deg, #e57200, #ff9a3c, #e57200);
+        }
+
+        @keyframes slideUpCard {
+            from { opacity: 0; transform: translateY(40px) scale(0.95); }
+            to   { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .splash-owl {
+            width: 72px;
+            height: 72px;
+            margin: 0 auto 14px;
+            filter: drop-shadow(0 4px 12px rgba(229,114,0,0.25));
+        }
+
+        .splash-title {
+            font-family: 'Sora', sans-serif;
+            font-size: 34px;
+            font-weight: 800;
+            color: #e57200;
+            letter-spacing: -1.5px;
+            margin-bottom: 28px;
+        }
+
+        .splash-slogans {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 36px;
+        }
+
+        .slogan-line {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            font-family: 'Sora', sans-serif;
+            font-size: 17px;
+            font-weight: 700;
+            color: #1a1f2e;
+            opacity: 0;
+            animation: fadeSlogan 0.5s ease forwards;
+        }
+
+        .slogan-line:nth-child(1) { animation-delay: 0.3s; }
+        .slogan-line:nth-child(2) { animation-delay: 0.5s; }
+        .slogan-line:nth-child(3) { animation-delay: 0.7s; }
+
+        @keyframes fadeSlogan {
+            from { opacity: 0; transform: translateX(-10px); }
+            to   { opacity: 1; transform: translateX(0); }
+        }
+
+        .slogan-icon {
+            width: 34px; height: 34px;
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 17px;
+            flex-shrink: 0;
+        }
+
+        .slogan-icon.orange { background: #fff3e0; }
+        .slogan-icon.dark   { background: #f0f2ff; }
+        .slogan-icon.green  { background: #e8f5e9; }
+
+        .splash-btns {
+            display: flex; gap: 12px;
+            opacity: 0;
+            animation: fadeSlogan 0.5s ease 0.9s forwards;
+        }
+
+        .splash-btn {
+            flex: 1; padding: 14px;
+            border-radius: 14px;
+            font-family: 'Sora', sans-serif;
+            font-size: 14px; font-weight: 700;
+            cursor: pointer; text-decoration: none;
+            text-align: center; transition: all 0.2s;
+            display: block;
+        }
+
+        .hoo-btn {
+            background: linear-gradient(135deg, #e57200 0%, #ff9a3c 100%);
+            color: white; border: none;
+            box-shadow: 0 6px 20px rgba(229,114,0,0.4);
+        }
+        .hoo-btn:hover { background: linear-gradient(135deg, #bf5e00 0%, #e57200 100%); transform: translateY(-2px); }
+
+        .what-btn {
+            background: white; color: #e57200;
+            border: 2px solid #e57200;
+        }
+        .what-btn:hover { background: #fff3e0; transform: translateY(-2px); }
     </style>
 </head>
 <body>
 
-    <div class="app-container" style="display: flex;">
-        <aside class="sidebar" style="width: 350px; height: 100vh; display: flex; flex-direction: column; box-shadow: 2px 0 10px rgba(0,0,0,0.1); z-index: 1000;">
-            <div class="sidebar-header" style="background: #232d4b; color: white; padding: 25px;">
-                <h1 style="margin: 0;">Cville Scout</h1>
+<!-- SPLASH OVERLAY -->
+<div class="splash-overlay" id="splashOverlay">
+    <div class="splash-card">
+
+        <!-- Owl -->
+        <svg class="splash-owl" viewBox="0 0 110 110" xmlns="http://www.w3.org/2000/svg">
+            <polygon points="36,26 30,8 44,22" fill="#e57200"/>
+            <polygon points="74,26 80,8 66,22" fill="#e57200"/>
+            <ellipse cx="55" cy="38" rx="24" ry="22" fill="#fff3e0"/>
+            <ellipse cx="55" cy="75" rx="28" ry="28" fill="#fff3e0"/>
+            <ellipse cx="28" cy="72" rx="12" ry="22" fill="#ffcc99" stroke="#e57200" stroke-width="1" transform="rotate(-10 28 72)"/>
+            <ellipse cx="82" cy="72" rx="12" ry="22" fill="#ffcc99" stroke="#e57200" stroke-width="1" transform="rotate(10 82 72)"/>
+            <ellipse cx="55" cy="76" rx="16" ry="20" fill="white" opacity="0.6"/>
+            <ellipse cx="55" cy="40" rx="20" ry="18" fill="white" opacity="0.7"/>
+            <circle cx="44" cy="38" r="10" fill="white" stroke="#e57200" stroke-width="2"/>
+            <circle cx="66" cy="38" r="10" fill="white" stroke="#e57200" stroke-width="2"/>
+            <circle cx="44" cy="38" r="6.5" fill="#1a1f2e"/>
+            <circle cx="66" cy="38" r="6.5" fill="#1a1f2e"/>
+            <circle cx="46" cy="36" r="2" fill="white"/>
+            <circle cx="68" cy="36" r="2" fill="white"/>
+            <polygon points="55,46 49,54 61,54" fill="#e57200"/>
+            <line x1="45" y1="100" x2="38" y2="108" stroke="#e57200" stroke-width="3" stroke-linecap="round"/>
+            <line x1="45" y1="100" x2="45" y2="109" stroke="#e57200" stroke-width="3" stroke-linecap="round"/>
+            <line x1="45" y1="100" x2="52" y2="108" stroke="#e57200" stroke-width="3" stroke-linecap="round"/>
+            <line x1="65" y1="100" x2="58" y2="108" stroke="#e57200" stroke-width="3" stroke-linecap="round"/>
+            <line x1="65" y1="100" x2="65" y2="109" stroke="#e57200" stroke-width="3" stroke-linecap="round"/>
+            <line x1="65" y1="100" x2="72" y2="108" stroke="#e57200" stroke-width="3" stroke-linecap="round"/>
+        </svg>
+
+        <div class="splash-title">HooThere</div>
+
+        <div class="splash-slogans">
+            <div class="slogan-line">
+                <div class="slogan-icon orange">🤝</div>
+                Find new people
             </div>
-
-            <div class="user-panel">
-                <small>Logged in as:</small>
-                <div id="display-name" style="font-weight: bold; color: #232d4b;">Cville Scout (Test)</div>
-                <a href="login.html" style="font-size: 11px; color: #e57200; text-decoration: none;">Sign Out</a>
+            <div class="slogan-line">
+                <div class="slogan-icon dark">📍</div>
+                Find new spots
             </div>
-
-            <div class="discovery-tool">
-                <label><strong>Max Budget:</strong> <span id="priceLabel">$50</span></label>
-                <input type="range" style="width: 100%; margin: 10px 0;" min="0" max="100" value="50" oninput="document.getElementById('priceLabel').innerText = '$' + this.value">
-                
-                <p style="margin-top: 15px; margin-bottom: 5px;"><strong>Interests:</strong></p>
-                <div class="chip-container">
-                    <div class="chip active">🍔 Food</div>
-                    <div class="chip">🌲 Hiking</div>
-                    <div class="chip">💪 Gyms</div>
-                    <div class="chip">📚 History</div>
-                </div>
-
-                <button class="filter-btn" style="width: 100%; background: #e57200; color: white; border: none; padding: 12px; border-radius: 6px; margin-top: 20px; cursor: pointer; font-weight: bold;">
-                    Update Recommendations
-                </button>
+            <div class="slogan-line">
+                <div class="slogan-icon green">🌱</div>
+                Find new community
             </div>
+        </div>
 
-            <div id="location-list" style="overflow-y: auto; flex-grow: 1; padding: 10px;"></div>
-        </aside>
+        <div class="splash-btns">
+            <a href="{% url 'hoo_view' %}" class="splash-btn hoo-btn">🦉 HooThere</a>
+            <button class="splash-btn what-btn" onclick="dismissSplash()">📍 WhatThere</button>
+        </div>
 
-        <main id="map"></main>
     </div>
+</div>
 
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    
-    <script src="../static/js/map.js"></script>
+<div class="app-container">
+    <aside class="sidebar">
+
+        <!-- HEADER with OWL LOGO -->
+        <div class="sidebar-header">
+            <div class="brand-row">
+                <!-- Copyright-free original SVG Owl Logo -->
+                <svg class="owl-logo" viewBox="0 0 110 110" xmlns="http://www.w3.org/2000/svg">
+                    <!-- Ear tufts -->
+                    <polygon points="36,26 30,8 44,22" fill="white"/>
+                    <polygon points="74,26 80,8 66,22" fill="white"/>
+                    <!-- Head -->
+                    <ellipse cx="55" cy="38" rx="24" ry="22" fill="white"/>
+                    <!-- Body -->
+                    <ellipse cx="55" cy="75" rx="28" ry="28" fill="white"/>
+                    <!-- Wing left -->
+                    <ellipse cx="28" cy="72" rx="12" ry="22" fill="white" stroke="rgba(0,0,0,0.15)" stroke-width="1" transform="rotate(-10 28 72)"/>
+                    <!-- Wing right -->
+                    <ellipse cx="82" cy="72" rx="12" ry="22" fill="white" stroke="rgba(0,0,0,0.15)" stroke-width="1" transform="rotate(10 82 72)"/>
+                    <!-- Wing feather lines left -->
+                    <line x1="22" y1="62" x2="30" y2="88" stroke="rgba(0,0,0,0.12)" stroke-width="1" stroke-linecap="round"/>
+                    <line x1="27" y1="59" x2="33" y2="88" stroke="rgba(0,0,0,0.12)" stroke-width="1" stroke-linecap="round"/>
+                    <!-- Wing feather lines right -->
+                    <line x1="88" y1="62" x2="80" y2="88" stroke="rgba(0,0,0,0.12)" stroke-width="1" stroke-linecap="round"/>
+                    <line x1="83" y1="59" x2="77" y2="88" stroke="rgba(0,0,0,0.12)" stroke-width="1" stroke-linecap="round"/>
+                    <!-- Chest belly patch -->
+                    <ellipse cx="55" cy="76" rx="16" ry="20" fill="white" stroke="rgba(0,0,0,0.1)" stroke-width="1"/>
+                    <!-- Chest feather texture -->
+                    <path d="M 46 64 Q 55 60 64 64" fill="none" stroke="rgba(0,0,0,0.1)" stroke-width="1"/>
+                    <path d="M 44 70 Q 55 66 66 70" fill="none" stroke="rgba(0,0,0,0.1)" stroke-width="1"/>
+                    <path d="M 44 76 Q 55 72 66 76" fill="none" stroke="rgba(0,0,0,0.1)" stroke-width="1"/>
+                    <!-- Facial disc -->
+                    <ellipse cx="55" cy="40" rx="20" ry="18" fill="white" stroke="rgba(0,0,0,0.08)" stroke-width="1"/>
+                    <!-- Left eye ring -->
+                    <circle cx="44" cy="38" r="10" fill="white" stroke="black" stroke-width="2"/>
+                    <!-- Right eye ring -->
+                    <circle cx="66" cy="38" r="10" fill="white" stroke="black" stroke-width="2"/>
+                    <!-- Left iris -->
+                    <circle cx="44" cy="38" r="6.5" fill="black"/>
+                    <!-- Right iris -->
+                    <circle cx="66" cy="38" r="6.5" fill="black"/>
+                    <!-- Left eye shine -->
+                    <circle cx="46" cy="36" r="2" fill="white"/>
+                    <!-- Right eye shine -->
+                    <circle cx="68" cy="36" r="2" fill="white"/>
+                    <!-- Beak -->
+                    <polygon points="55,46 49,54 61,54" fill="white" stroke="black" stroke-width="1.5" stroke-linejoin="round"/>
+                    <!-- Feet left -->
+                    <line x1="45" y1="100" x2="38" y2="108" stroke="white" stroke-width="3" stroke-linecap="round"/>
+                    <line x1="45" y1="100" x2="45" y2="109" stroke="white" stroke-width="3" stroke-linecap="round"/>
+                    <line x1="45" y1="100" x2="52" y2="108" stroke="white" stroke-width="3" stroke-linecap="round"/>
+                    <!-- Feet right -->
+                    <line x1="65" y1="100" x2="58" y2="108" stroke="white" stroke-width="3" stroke-linecap="round"/>
+                    <line x1="65" y1="100" x2="65" y2="109" stroke="white" stroke-width="3" stroke-linecap="round"/>
+                    <line x1="65" y1="100" x2="72" y2="108" stroke="white" stroke-width="3" stroke-linecap="round"/>
+                </svg>
+                <div class="brand-text">
+                    <div class="brand-name">HooThere</div>
+                    <div class="brand-tagline">Discover Charlottesville your way</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- USER PANEL -->
+        <div class="user-panel">
+            <div class="user-info">
+                <span class="welcome-emoji">👋</span>
+                <strong class="welcome-text">Welcome, {% if user.is_authenticated %}{{ user.username }}{% else %}Guest{% endif %}!</strong>
+            </div>
+            <a href="/logout/" class="signout-link">Sign Out →</a>
+        </div>
+
+        <!-- FILTERS -->
+        <div class="discovery-tool">
+            <label class="section-label">💰 Budget Range</label>
+            <div class="budget-row">
+                <input type="number" id="budgetMin" class="budget-input" placeholder="Min $" min="0" max="500">
+                <span class="budget-sep">to</span>
+                <input type="number" id="budgetMax" class="budget-input" placeholder="Max $" min="0" max="500">
+            </div>
+            <small style="color:var(--muted); font-size:11px;">Use 0 for free spots</small>
+
+            <label class="section-label" style="margin-top:14px;">📍 Categories</label>
+            <div class="chip-container">
+                <button class="chip active" onclick="selectCategory('all', this)">🗺️ All</button>
+                <button class="chip" onclick="selectCategory('restaurant', this)">🍔 Food</button>
+                <button class="chip" onclick="selectCategory('trail', this)">🥾 Trails</button>
+                <button class="chip" onclick="selectCategory('gym', this)">💪 Gyms</button>
+                <button class="chip" onclick="selectCategory('history', this)">📚 History</button>
+                <button class="chip" onclick="selectCategory('bar', this)">🍺 Bars</button>
+                <button class="chip" onclick="selectCategory('cafe', this)">☕ Cafés</button>
+                <button class="chip" onclick="selectCategory('park', this)">🌳 Parks</button>
+                <button class="chip" onclick="selectCategory('vineyard', this)">🍷 Vineyards</button>
+                <button class="chip" onclick="selectCategory('arts', this)">🎨 Arts</button>
+                <button class="chip" onclick="selectCategory('shopping', this)">🛍️ Shopping</button>
+                <button class="chip" onclick="selectCategory('hidden_gem', this)">💎 Local Secrets</button>
+            </div>
+
+            <button class="apply-btn" onclick="applyFilters()">🔍 Find Places</button>
+        </div>
+
+        <div id="result-count" class="result-count" style="display:none;"></div>
+
+        <div id="location-list">
+            <div class="empty-state">
+                <span class="owl-empty">🦉</span>
+                Set your budget and categories,<br>then click <strong>Find Places</strong>!
+            </div>
+        </div>
+
+    </aside>
+
+    <main id="map"></main>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="{% static 'js/map.js' %}"></script>
+
+<!-- BOTTOM NAV (always visible on map) -->
+<div class="bottom-nav" id="bottomNav" style="display:none;">
+    <a href="{% url 'hoo_view' %}" class="nav-tab hoo">🦉 HooThere</a>
+    <span class="nav-tab what">📍 WhatThere</span>
+</div>
+
+<script>
+    // Only show splash once per login session using sessionStorage
+    var splashKey = 'hoothere_splash_shown_{{ request.user.username }}';
+    var overlay = document.getElementById('splashOverlay');
+    var bottomNav = document.getElementById('bottomNav');
+
+    if (sessionStorage.getItem(splashKey)) {
+        // Already seen this session — hide immediately, show nav
+        overlay.style.display = 'none';
+        bottomNav.style.display = 'flex';
+    }
+    // else: splash stays visible as rendered
+
+    function dismissSplash() {
+        sessionStorage.setItem(splashKey, '1');
+        overlay.classList.add('hiding');
+        setTimeout(function() {
+            overlay.style.display = 'none';
+            bottomNav.style.display = 'flex';
+        }, 400);
+    }
+</script>
 </body>
 </html>

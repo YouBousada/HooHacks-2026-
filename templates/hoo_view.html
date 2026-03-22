@@ -1,0 +1,238 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HooThere | Find Your Crew</title>
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Nunito:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+    <style>
+        :root {
+            --orange: #e57200; --orange-dark: #bf5e00; --orange-light: #fff3e0;
+            --orange-mid: #ff9a3c; --navy: #1a1f2e; --text: #2d2d2d;
+            --muted: #8a8a8a; --border: #eedfd0; --cream: #fffaf5;
+        }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Nunito', sans-serif; background: var(--cream); color: var(--text); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+
+        /* Header */
+        .hoo-header {
+            background: linear-gradient(135deg, var(--orange) 0%, var(--orange-mid) 100%);
+            padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0;
+        }
+        .hoo-header .brand { font-family: 'Sora', sans-serif; font-size: 22px; font-weight: 800; color: white; letter-spacing: -0.5px; }
+        .hoo-header .welcome { font-size: 12px; color: rgba(255,255,255,0.85); font-weight: 600; }
+        .back-btn { background: rgba(255,255,255,0.2); color: white; border: none; padding: 7px 14px; border-radius: 20px; font-size: 12px; font-weight: 700; cursor: pointer; font-family: 'Sora', sans-serif; text-decoration: none; transition: background 0.2s; }
+        .back-btn:hover { background: rgba(255,255,255,0.3); }
+
+        /* Body layout */
+        .hoo-body { display: flex; flex: 1; overflow: hidden; }
+
+        /* Sidebar */
+        .hoo-sidebar { width: 380px; background: white; border-right: 1px solid var(--border); display: flex; flex-direction: column; overflow: hidden; flex-shrink: 0; }
+        .sidebar-top { padding: 16px 18px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+        .sidebar-top h2 { font-family: 'Sora', sans-serif; font-size: 16px; font-weight: 700; color: var(--navy); }
+        .host-btn { background: linear-gradient(135deg, var(--orange), var(--orange-mid)); color: white; border: none; padding: 9px 16px; border-radius: 20px; font-size: 12px; font-weight: 700; font-family: 'Sora', sans-serif; cursor: pointer; text-decoration: none; box-shadow: 0 3px 10px rgba(229,114,0,0.3); transition: all 0.2s; }
+        .host-btn:hover { transform: translateY(-1px); box-shadow: 0 5px 14px rgba(229,114,0,0.4); }
+
+        /* Event cards */
+        .events-list { flex: 1; overflow-y: auto; padding: 12px; }
+        .events-list::-webkit-scrollbar { width: 4px; }
+        .events-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+        .event-card { background: var(--cream); border: 1.5px solid var(--border); border-radius: 14px; padding: 14px 16px; margin-bottom: 10px; cursor: pointer; transition: all 0.18s; }
+        .event-card:hover, .event-card.active { border-color: var(--orange); background: var(--orange-light); }
+        .event-card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; margin-bottom: 8px; }
+        .event-location { font-family: 'Sora', sans-serif; font-size: 14px; font-weight: 700; color: var(--navy); }
+        .event-host { font-size: 11px; color: var(--muted); margin-top: 2px; }
+        .attendee-badge { background: var(--orange-light); color: var(--orange-dark); font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 20px; white-space: nowrap; flex-shrink: 0; }
+        .attendee-badge.full { background: #fce4ec; color: #c62828; }
+        .event-desc { font-size: 12px; color: #555; line-height: 1.5; margin-bottom: 8px; }
+        .event-meta { font-size: 11px; color: var(--muted); display: flex; flex-direction: column; gap: 3px; margin-bottom: 10px; }
+        .join-btn { width: 100%; padding: 9px; background: var(--orange); color: white; border: none; border-radius: 10px; font-size: 12px; font-weight: 700; font-family: 'Sora', sans-serif; cursor: pointer; transition: all 0.2s; }
+        .join-btn:hover { background: var(--orange-dark); }
+        .join-btn.joined { background: #e8f5e9; color: #2e7d32; cursor: default; }
+        .join-btn.full { background: #f5f5f5; color: #aaa; cursor: default; }
+
+        .empty-state { text-align: center; padding: 40px 20px; color: var(--muted); font-size: 13px; line-height: 1.7; }
+        .empty-state .big { font-size: 36px; display: block; margin-bottom: 10px; }
+
+        /* Host & attendee action rows */
+        .host-actions, .attendee-actions { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 4px; }
+        .hosting-badge, .joined-badge { font-size: 12px; font-weight: 700; color: var(--orange-dark); background: var(--orange-light); padding: 5px 10px; border-radius: 20px; }
+        .joined-badge { color: #2e7d32; background: #e8f5e9; }
+        .host-btns { display: flex; gap: 6px; }
+        .action-btn { padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: 700; font-family: 'Sora', sans-serif; cursor: pointer; border: none; text-decoration: none; transition: all 0.18s; display: inline-block; }
+        .edit-btn { background: #e8f0fe; color: #1a73e8; }
+        .edit-btn:hover { background: #d2e3fc; }
+        .delete-btn { background: #fce8e8; color: #c62828; }
+        .delete-btn:hover { background: #f8d0d0; }
+        .leave-btn { background: #fce8e8; color: #c62828; }
+        .leave-btn:hover { background: #f8d0d0; }
+
+        /* Map */
+        #hoo-map { flex: 1; }
+
+        /* Bottom nav tabs */
+        .bottom-nav {
+            position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+            display: flex; gap: 12px; padding: 12px 20px 16px;
+            background: white; border-radius: 24px 24px 0 0;
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.1);
+            z-index: 1000;
+        }
+        .nav-tab { padding: 10px 28px; border-radius: 20px; font-family: 'Sora', sans-serif; font-size: 14px; font-weight: 700; cursor: pointer; border: 2px solid var(--orange); transition: all 0.2s; text-decoration: none; }
+        .nav-tab.hoo { background: var(--orange); color: white; box-shadow: 0 4px 12px rgba(229,114,0,0.35); }
+        .nav-tab.what { background: white; color: var(--orange); }
+        .nav-tab.what:hover { background: var(--orange-light); }
+
+        /* Leaflet popup */
+        .leaflet-popup-content-wrapper { border-radius: 12px !important; box-shadow: 0 8px 30px rgba(229,114,0,0.2) !important; border: 1.5px solid var(--border) !important; }
+        .leaflet-popup-tip-container { display: none; }
+    </style>
+</head>
+<body>
+
+<div class="hoo-header">
+    <div>
+        <div class="brand">🦉 HooThere</div>
+        <div class="welcome">👋 {{ request.user.username }}</div>
+    </div>
+    <a href="{% url 'logout' %}" class="back-btn" onclick="return confirm('Sign out of HooThere?')">Sign Out →</a>
+</div>
+
+<div class="hoo-body">
+    <!-- Sidebar: event list -->
+    <aside class="hoo-sidebar">
+        <div class="sidebar-top">
+            <h2>🔥 Active Hangouts</h2>
+            <a href="{% url 'hoo_host' %}" class="host-btn">+ Host One</a>
+        </div>
+        <div class="events-list">
+            {% if hoo_events %}
+                {% for event in hoo_events %}
+                <div class="event-card" id="card-{{ event.id }}" onclick="focusEvent({{ event.id }}, {{ event.lat }}, {{ event.lng }})">
+                    <div class="event-card-top">
+                        <div>
+                            <div class="event-location">📍 {{ event.location_name }}</div>
+                            <div class="event-host">Hosted by @{{ event.host.username }}</div>
+                        </div>
+                        <span class="attendee-badge {% if event.attendees.count >= event.max_attendees %}full{% endif %}">
+                            {{ event.attendees.count }}/{{ event.max_attendees }}
+                        </span>
+                    </div>
+                    <div class="event-desc">{{ event.description }}</div>
+                    <div class="event-meta">
+                        <span>🏠 {{ event.address }}</span>
+                        <span>📞 {{ event.contact_info }}</span>
+                    </div>
+                    {% if request.user == event.host %}
+                        <div class="host-actions">
+                            <span class="hosting-badge">🦉 You're hosting</span>
+                            <div class="host-btns">
+                                <a href="{% url 'hoo_edit' event.id %}" class="action-btn edit-btn">✏️ Edit</a>
+                                <form method="POST" action="{% url 'hoo_delete' event.id %}" style="display:inline;" onsubmit="return confirm('Delete this hangout? This cannot be undone.')">
+                                    {% csrf_token %}
+                                    <button type="submit" class="action-btn delete-btn">🗑 Delete</button>
+                                </form>
+                            </div>
+                        </div>
+                    {% elif event.id in attending_ids %}
+                        <div class="attendee-actions">
+                            <span class="joined-badge">✔ You're in!</span>
+                            <form method="POST" action="{% url 'hoo_leave' event.id %}" style="display:inline;" onsubmit="return confirm('Leave this hangout?')">
+                                {% csrf_token %}
+                                <button type="submit" class="action-btn leave-btn">↩ Leave</button>
+                            </form>
+                        </div>
+                    {% elif event.attendees.count >= event.max_attendees %}
+                        <button class="join-btn full" disabled>Full</button>
+                    {% else %}
+                        <button class="join-btn" onclick="joinEvent(event, {{ event.id }})">I'm In! 🙋</button>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty-state">
+                    <span class="big">🦉</span>
+                    No hangouts yet!<br>Be the first to <strong>host one</strong>.
+                </div>
+            {% endif %}
+        </div>
+    </aside>
+
+    <!-- Map -->
+    <div id="hoo-map"></div>
+</div>
+
+<!-- Bottom nav -->
+<div class="bottom-nav">
+    <a href="{% url 'hoo_view' %}" class="nav-tab hoo">🦉 HooThere</a>
+    <a href="{% url 'map' %}" class="nav-tab what">📍 WhatThere</a>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+var hooMap = L.map('hoo-map', { center: [38.0293, -78.4767], zoom: 14 });
+L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+    attribution: '© OpenStreetMap contributors © CARTO', subdomains: 'abcd'
+}).addTo(hooMap);
+
+var hooEvents = {{ hoo_events_json|safe }};
+var attendingIds = {{ attending_ids_json|safe }};
+var markerMap = {};
+
+function makeHooIcon(isFull, isAttending, isHost) {
+    var color = isHost ? '#8e24aa' : isAttending ? '#2e7d32' : isFull ? '#c62828' : '#e57200';
+    var emoji = isHost ? '🦉' : isAttending ? '✅' : isFull ? '🔴' : '🟠';
+    return L.divIcon({
+        className: '',
+        html: '<div style="width:38px;height:38px;border-radius:50%;background:white;border:3px solid ' + color + ';display:flex;align-items:center;justify-content:center;font-size:17px;box-shadow:0 2px 10px rgba(0,0,0,0.2);">' + emoji + '</div>',
+        iconSize: [38,38], iconAnchor: [19,19], popupAnchor: [0,-22]
+    });
+}
+
+hooEvents.forEach(function(e) {
+    var isFull = e.attendee_count >= e.max_attendees;
+    var isAttending = attendingIds.indexOf(e.id) !== -1;
+    var isHost = e.host === '{{ request.user.username }}';
+    var marker = L.marker([e.lat, e.lng], { icon: makeHooIcon(isFull, isAttending, isHost) })
+        .addTo(hooMap)
+        .bindPopup(
+            '<div style="min-width:200px;font-family:Nunito,sans-serif;">' +
+            '<div style="font-size:15px;font-weight:700;color:#1a1f2e;margin-bottom:3px;">📍 ' + e.location_name + '</div>' +
+            '<div style="font-size:11px;color:#aaa;margin-bottom:6px;">Hosted by @' + e.host + '</div>' +
+            '<div style="font-size:12px;color:#555;margin-bottom:6px;">' + e.description + '</div>' +
+            '<div style="font-size:11px;color:#888;margin-bottom:4px;">👥 ' + e.attendee_count + '/' + e.max_attendees + ' going</div>' +
+            '<div style="font-size:11px;color:#888;">📞 ' + e.contact_info + '</div>' +
+            '</div>'
+        );
+    markerMap[e.id] = marker;
+});
+
+function focusEvent(id, lat, lng) {
+    hooMap.flyTo([lat, lng], 16, { duration: 0.8 });
+    setTimeout(function() { if (markerMap[id]) markerMap[id].openPopup(); }, 850);
+    document.querySelectorAll('.event-card').forEach(function(c) { c.classList.remove('active'); });
+    var card = document.getElementById('card-' + id);
+    if (card) card.classList.add('active');
+}
+
+function joinEvent(e, eventId) {
+    e.stopPropagation();
+    // Submit a hidden form with CSRF token — same pattern as leave/delete
+    var form = document.createElement('form');
+    form.method = 'POST';
+    form.action = '/events/hoo/join/' + eventId + '/';
+    var csrf = document.createElement('input');
+    csrf.type = 'hidden';
+    csrf.name = 'csrfmiddlewaretoken';
+    csrf.value = '{{ csrf_token }}';
+    form.appendChild(csrf);
+    document.body.appendChild(form);
+    form.submit();
+}
+</script>
+</body>
+</html>

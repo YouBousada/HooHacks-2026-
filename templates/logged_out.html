@@ -1,0 +1,30 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Logged Out | Cville Scout</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif; background: #f4f4f9; padding: 20px; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        .container { max-width: 500px; width: 100%; }
+        .auth-card { background: white; padding: 40px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); text-align: center; }
+        .auth-card h1 { color: #232d4b; margin-bottom: 10px; font-size: 28px; }
+        .auth-card p { color: #666; margin-bottom: 30px; font-size: 15px; line-height: 1.6; }
+        .success-icon { font-size: 48px; margin-bottom: 20px; }
+        .logout-btn { display: inline-block; padding: 12px 30px; background: #232d4b; color: white; text-decoration: none; border-radius: 6px; font-weight: bold; transition: background 0.3s ease; }
+        .logout-btn:hover { background: #1a1f38; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="auth-card">
+            <div class="success-icon">✓</div>
+            <h1>You've Been Logged Out</h1>
+            <p>You have been successfully logged out from Cville Scout.</p>
+            <a href="{% url 'login' %}" class="logout-btn">Back to Login</a>
+        </div>
+    </div>
+</body>
+</html>

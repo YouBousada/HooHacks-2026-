@@ -1,78 +1,123 @@
-/* 1. Reset and Foundation */
+/* ── HooThere Global Styles ── */
 :root {
-    --cville-navy: #232d4b;    /* UVA Navy */
-    --cville-orange: #e57200;  /* UVA Orange */
-    --sidebar-width: 350px;
-    --bg-light: #f8f9fa;
+    --orange:      #e57200;
+    --orange-dark: #bf5e00;
+    --orange-light:#fff3e0;
+    --orange-mid:  #ff9a3c;
+    --cream:       #fffaf5;
+    --navy:        #1a1f2e;
+    --text:        #2d2d2d;
+    --muted:       #8a8a8a;
+    --border:      #eedfd0;
 }
 
-body, html {
-    margin: 0;
-    padding: 0;
+html, body {
     height: 100%;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    font-family: 'Nunito', 'Segoe UI', sans-serif;
+    background: var(--cream);
+    color: var(--text);
 }
 
-/* 2. Layout Container */
+/* ── Map fills remaining space ── */
+#map {
+    flex-grow: 1;
+    height: 100%;
+    width: 100%;
+}
+
+/* ── App layout ── */
 .app-container {
     display: flex;
     height: 100vh;
     width: 100vw;
 }
 
-/* 3. Sidebar Styling */
+/* ── Sidebar ── */
 .sidebar {
-    width: var(--sidebar-width);
+    width: 360px;
     background: white;
-    box-shadow: 2px 0 15px rgba(0,0,0,0.1);
+    box-shadow: 4px 0 20px rgba(229,114,0,0.08);
     display: flex;
     flex-direction: column;
-    z-index: 1000; /* Keeps sidebar above the map */
+    z-index: 1000;
+    border-right: 1px solid var(--border);
 }
 
 .sidebar-header {
-    padding: 25px;
-    background: var(--cville-navy);
+    background: linear-gradient(135deg, var(--orange) 0%, var(--orange-mid) 100%);
+    padding: 22px 25px;
     color: white;
 }
 
 .sidebar-header h1 { margin: 0; font-size: 24px; }
-.sidebar-header p { margin: 5px 0 0; opacity: 0.8; font-size: 14px; }
+.sidebar-header p  { margin: 4px 0 0; opacity: 0.85; font-size: 13px; }
 
-/* 4. Filter Buttons */
-.filter-group {
-    padding: 20px;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    border-bottom: 1px solid #eee;
-}
+/* ── Filter chips ── */
+.interest-grid { display: flex; flex-wrap: wrap; gap: 8px; }
 
-.filter-btn {
-    padding: 8px 16px;
-    border: 1px solid #ddd;
-    border-radius: 25px;
-    background: white;
+.hidden-check { display: none; }
+
+.chip {
+    display: inline-block;
+    padding: 6px 14px;
+    border: 1.5px solid var(--border);
+    border-radius: 20px;
     cursor: pointer;
-    transition: all 0.3s ease;
-    font-weight: 500;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--muted);
+    background: var(--cream);
+    transition: all 0.2s;
+    user-select: none;
 }
 
-.filter-btn:hover, .filter-btn.active {
-    background: var(--cville-orange);
+.hidden-check:checked + .chip {
+    background: var(--orange);
+    border-color: var(--orange);
     color: white;
-    border-color: var(--cville-orange);
 }
 
-/* 5. The Map Area (CRITICAL) */
-#map {
-    flex-grow: 1; /* Takes up the remaining screen space */
-    height: 100%;
+.chip:hover {
+    border-color: var(--orange);
+    color: var(--orange);
 }
 
-/* 6. Location List (For later) */
-.location-list {
-    flex-grow: 1;
-    overflow-y: auto; /* Makes the sidebar scrollable */
-    padding: 10px;
+/* ── Filter / apply button ── */
+.filter-btn, .apply-btn {
+    padding: 10px 18px;
+    border: none;
+    border-radius: 10px;
+    background: linear-gradient(135deg, var(--orange) 0%, var(--orange-mid) 100%);
+    color: white;
+    cursor: pointer;
+    font-weight: 700;
+    font-size: 14px;
+    transition: all 0.2s;
+    box-shadow: 0 4px 12px rgba(229,114,0,0.3);
+}
+
+.filter-btn:hover, .apply-btn:hover {
+    background: linear-gradient(135deg, var(--orange-dark) 0%, var(--orange) 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(229,114,0,0.4);
+}
+
+/* ── Location list cards ── */
+.location-list { flex-grow: 1; overflow-y: auto; padding: 10px; }
+
+.location-card {
+    padding: 12px 14px;
+    border-radius: 10px;
+    margin-bottom: 6px;
+    cursor: pointer;
+    border: 1.5px solid transparent;
+    background: var(--cream);
+    transition: all 0.18s;
+}
+
+.location-card:hover {
+    border-color: var(--orange);
+    background: var(--orange-light);
+    transform: translateX(2px);
 }
