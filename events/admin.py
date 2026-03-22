@@ -2,25 +2,7 @@
 Django admin configuration for the events app.
 """
 from django.contrib import admin
-from .models import Event, HooEvent, HooAttendee
-
-
-@admin.register(Event)
-class EventAdmin(admin.ModelAdmin):
-    """Admin interface for Event model."""
-    list_display = ['name', 'time', 'address', 'creator', 'created_at']
-    list_filter = ['time', 'created_at', 'creator']
-    search_fields = ['name', 'description', 'address', 'creator__username']
-    readonly_fields = ['created_at', 'updated_at']
-    fieldsets = (
-        ('Event Information', {
-            'fields': ('name', 'description', 'time', 'address', 'creator')
-        }),
-        ('Metadata', {
-            'fields': ('created_at', 'updated_at'),
-            'classes': ('collapse',)
-        }),
-    )
+from .models import HooEvent, HooAttendee
 
 
 @admin.register(HooEvent)

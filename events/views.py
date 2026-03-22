@@ -14,8 +14,7 @@ from django.contrib import messages
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 from django.contrib.auth.decorators import login_required
-from .models import Event, HooEvent, HooAttendee
-from .forms import EventForm
+from .models import HooEvent, HooAttendee
 
 
 class CustomLoginView(LoginView):
@@ -64,57 +63,8 @@ class CustomLogoutView(LogoutView):
         return redirect(self.next_page)
 
 
-# ── Original Event views ──────────────────────────────────────────────────────
-class EventListView(ListView):
-    model = Event
-    template_name = 'events/event_list.html'
-    context_object_name = 'events'
-    paginate_by = 10
-
-
-class EventDetailView(DetailView):
-    model = Event
-    template_name = 'events/event_detail.html'
-    context_object_name = 'event'
-
-
-class EventCreateView(CreateView):
-    model = Event
-    form_class = EventForm
-    template_name = 'events/event_form.html'
-    success_url = reverse_lazy('event_list')
-
-    def form_valid(self, form):
-        form.instance.creator = self.request.user
-        return super().form_valid(form)
-
-
-class EventUpdateView(UserPassesTestMixin, UpdateView):
-    model = Event
-    form_class = EventForm
-    template_name = 'events/event_form.html'
-    success_url = reverse_lazy('event_list')
-
-    def test_func(self):
-        return self.request.user == self.get_object().creator
-
-    def handle_no_permission(self):
-        return redirect('event_detail', pk=self.get_object().pk)
-
-
-class EventDeleteView(UserPassesTestMixin, DeleteView):
-    model = Event
-    template_name = 'events/event_confirm_delete.html'
-    success_url = reverse_lazy('event_list')
-
-    def test_func(self):
-        return self.request.user == self.get_object().creator
-
-    def handle_no_permission(self):
-        return redirect('event_detail', pk=self.get_object().pk)
-
-
 # ── Map view ──────────────────────────────────────────────────────────────────
+@login_required
 def map_view(request):
     return render(request, 'map_view.html')
 
