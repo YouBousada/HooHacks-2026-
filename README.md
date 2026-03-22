@@ -1,40 +1,123 @@
-# Django Events Manager
+# HooThere
 
-A basic Django web application for managing events with name, time, and description.
+This repository is a Django-based location and event discovery app built for Charlottesville, with two main experiences:
 
-## Features
+1. **HooThere** – community-hosted meetups and hangouts (host + join flows)
+2. **WhatThere** – interactive map of local places and hidden gems (dynamic, admin-managed locations)
 
-- 📅 **Create Events** - Add new events with name, description, and time
-- 🔍 **View Events** - Browse all events in a beautiful card layout
-- ✏️ **Edit Events** - Update event details
-- 🗑️ **Delete Events** - Remove events you no longer need
-- 📱 **Responsive Design** - Works great on mobile and desktop with Bootstrap 5
-- ⚙️ **Django Admin** - Manage events through Django's admin interface
+## Core Features
+
+- ✅ User authentication (login/signup/logout)
+- ✅ User profile home/offers
+- ✅ HooEvent hosting (create/edit/delete by host)
+- ✅ Joining/leaving HooEvents, attendee limits
+- ✅ HooAttendee tracking
+- ✅ PlaceSuggestion model for user-submitted location ideas
+- ✅ Location model with full admin CRUD
+- ✅ Leaflet map UI with category filtering and marker popups
+- ✅ Original 65 locations imported from hardcoded dataset
+- ✅ Postgres-ready DB config with env var fallback to SQLite
 
 ## Project Structure
 
 ```
 HooHacks-2026-/
-├── manage.py                 # Django management script
-├── requirements.txt          # Python dependencies
-├── event_site/              # Main project configuration
-│   ├── settings.py          # Django settings
-│   ├── urls.py              # Main URL routing
-│   └── wsgi.py              # WSGI application
-├── events/                  # Events app
-│   ├── models.py            # Event model definition
-│   ├── views.py             # View logic
-│   ├── forms.py             # Event form
-│   ├── urls.py              # Events URL routing
-│   └── admin.py             # Admin interface
-└── templates/               # HTML templates
-    ├── base.html            # Base template
-    └── events/              # Event templates
-        ├── event_list.html
-        ├── event_detail.html
-        ├── event_form.html
-        └── event_confirm_delete.html
+├── manage.py
+├── requirements.txt
+├── LICENSE.md
+├── README.md
+├── event_site/
+│   ├── settings.py
+│   ├── urls.py
+│   └── wsgi.py
+├── events/
+│   ├── admin.py
+│   ├── apps.py
+│   ├── forms.py
+│   ├── migrations/
+│   ├── models.py
+│   ├── tests.py
+│   ├── urls.py
+│   └── views.py
+├── templates/
+│   ├── login.html
+│   ├── signup.html
+│   ├── map_view.html
+│   ├── hoo_view.html
+│   ├── hoo_host.html
+│   ├── hoo_edit.html
+│   └── ...
+└── static/
+    ├── css/style.css
+    └── js/map.js
 ```
+
+## Setup (local dev)
+
+1. Create and activate virtual environment
+
+```bash
+python -m venv venv
+venv\Scripts\activate
+```
+
+2. Install dependencies
+
+```bash
+pip install -r requirements.txt
+````
+
+3. Run migrations
+
+```bash
+python manage.py makemigrations
+python manage.py migrate
+```
+
+4. Create superuser
+
+```bash
+python manage.py createsuperuser
+```
+
+5. Start server
+
+```bash
+python manage.py runserver
+```
+
+6. Visit app
+- `http://127.0.0.1:8000/` (map + events)
+- `http://127.0.0.1:8000/admin/` (admin models)
+
+## Models
+
+- `HooEvent` (hosted events)
+- `HooAttendee` (event attendees)
+- `PlaceSuggestion` (user suggestions for new locations)
+- `Location` (seeded 65 entries + admin-managed discovery data)
+
+## Views
+
+- `map_view` – map / WhatThere UI
+- `hoo_view` – HooThere events feed
+- `hoo_host` – host event form
+- `hoo_edit`, `hoo_delete` – manage hosted events
+- `hoo_join`, `hoo_leave` – manage attendance
+- `hoo_events_json` – JSON API for event pins
+
+## Map data flow
+
+`map_view` serves category/marker data from `Location.objects.filter(is_active=True)` as JSON, then `static/js/map.js` renders Leaflet markers.
+
+## Security
+
+- Remove hardcoded API secrets from templates (now using Leaflet base tiles)
+- Keep sensitive values in env vars (`DJANGO_DB_*`, plus API keys when used)
+
+## Licensing
+
+This project is licensed under MIT. See [LICENSE.md](LICENSE.md).
 
 ## Quickstart
 
